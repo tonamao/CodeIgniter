@@ -21,21 +21,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<?php foreach ($cards as $card): ?>
 				<?php echo img($card); ?>
 			<?php endforeach; ?>
-
-
-				<?php for ($i = 0; $i < 54/4; $i++) {
-					$cnt = $i + 1;
-					$position = 100/(54/4 + 3)*$cnt;
-						$handimg_prop = array(
-							'src' => 'assets/img/cards/club_01.png',
-							'width' => '70',
-							'height' => 'auto',
-							'class' => "img $cnt",
-							'style' => "z-index:$cnt",
-							'style' => "left:$position%"
-						);
-					echo img($handimg_prop);
-				} ?>
 		</div>
 		<div class="status">
 			<div class="icon">
@@ -43,10 +28,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				$icon_prop = array(
 							'src' => 'assets/img/testicon.png',
 							'width' => '50',
-							'height' => 'auto',
-							'class' => "img $cnt",
-							'style' => "z-index:$cnt",
-							'style' => "left:$position%"
+							'height' => 'auto'
 						);
 				echo img($icon_prop);?>	
 			</div>
