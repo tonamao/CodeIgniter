@@ -17,6 +17,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div class=""></div>
 	</div>
 	<div class="user-area">
+                <div class="btn">
+                    <a href="#" class="btn-square-so-pop">出す</a>
+                    <a href="#" class="btn-square-so-pop">パス</a>
+                </div>
 		<div class="hand">
 			<?php foreach ($cards as $card): ?>
 				<?php 
@@ -45,4 +49,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		</div>
 	</div>
 </body>
-</html>
+</html>や
