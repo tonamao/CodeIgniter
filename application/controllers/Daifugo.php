@@ -7,17 +7,17 @@ class Daifugo extends CI_Controller {
 		parent::__construct();
 		$this->load->helper('url_helper');
 		$this->load->helper('html');
+		$this->load->model('cardController');
 	}
 
 	public function menu()
 	{
-		$data['card'] = $this->cardcontroller->init();
-
-		$this->load->view('daifugo/menu', $data);
+		$this->load->view('daifugo/menu');
 	}
 
-	public function index()
+	public function daifugo()
 	{
+		$data['cards'] = $this->cardController->initCard();
 		$this->load->view('daifugo/daifugo', $data);
 	}
 }
