@@ -10,7 +10,7 @@ class CardController extends CI_Model {
 		$cards = array();
 		foreach ($marks as $mark) {
 			for ( $i = 0; $i < 3; $i++) {
-				array_push($cards, $mark.'_'.$i.'.png');
+				array_push($cards, 'assets/img/cards/'.$mark.'_'.($i + 1).'.png');
 			}
 		}
 		return $cards;
