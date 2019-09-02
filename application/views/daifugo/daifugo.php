@@ -19,7 +19,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="user-area">
 		<div class="hand">
 			<?php foreach ($cards as $card): ?>
-				<?php echo img($card); ?>
+				<?php 
+				$card_prop = array(
+									'src' => $card,
+									'width' => '80',
+									'height' => 'auto'
+							);
+				echo img($card_prop); ?>
 			<?php endforeach; ?>
 		</div>
 		<div class="status">
