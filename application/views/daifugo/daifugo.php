@@ -12,6 +12,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <body>
 	<div class="cpu-area">
 		<div style="text-align:center">CPU</div>
+      <?php for($i = 0; $i < 3; $i++)
+		    <div class="cpu-area"></div>
+      ?>
 	</div>
 	<div class="game-area">
 		<div class=""></div>
