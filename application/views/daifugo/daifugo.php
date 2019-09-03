@@ -11,13 +11,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </head>
 <body>
 	<div class="cpu-area">
-		<div style="text-align:center">CPU</div>
-      <?php for($i = 0; $i < 3; $i++)
-		    <div class="cpu-area"></div>
-      ?>
+      <?php for($i = 0; $i < 3; $i++) {
+      	$num = ($i + 1);?>
+		    <div class="cpu <?php echo $num ?>">CPU<?php echo $num ?>
+				<div class="hand">
+					<?php foreach ($backs as $back): ?>
+						<?php 
+						$card_prop = array(
+											'src' => $back,
+											'width' => '40',
+											'height' => 'auto'
+									);
+						echo img($card_prop); ?>
+					<?php endforeach; ?>
+				</div>
+			</div>
+      <?php }?>
 	</div>
 	<div class="game-area">
-		<div class=""></div>
+		<div class="cards">
+	      	<?php for($i = 0; $i < 2; $i++) {?>
+				<div class="card img" style="z-index:<?php echo $cnt = $i + 1;?>; left:<?php echo $left = 42 + 4*$cnt; ?>%; top:<?php echo $top = 18 + 8*$cnt ?>%;">
+					<?php 
+					$cnt = $i + 1;
+					$position = 100/(54/4 + 10)*$cnt;
+						$card_prop = array(
+										'src' => 'assets/img/cards/spade_1.png',
+										'width' => '90',
+										'height' => 'auto'
+									);
+					echo img($card_prop); ?>
+				</div>
+	      	<?php }?>
+	    </div>
 	</div>
 	<div class="user-area">
                 <div class="btn">
@@ -29,7 +55,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<?php 
 				$card_prop = array(
 									'src' => $card,
-									'width' => '80',
+									'width' => '90',
 									'height' => 'auto'
 							);
 				echo img($card_prop); ?>
@@ -52,4 +78,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		</div>
 	</div>
 </body>
-</html>や
+</html>
