@@ -8,7 +8,7 @@ class Daifugo extends CI_Controller {
 	}
 	public function menu()
 	{
-		$this->load->view('daifugo/menu');
+		$this->load->view('menu');
 	}
 	
 }

@@ -16,4 +16,15 @@ class CardController extends CI_Model {
 		return $cards;
 	}
 
+	public function getCardBack() {
+		$marks = ['club', 'diamond', 'heart', 'spade'];
+		$backs = array();
+		foreach ($marks as $mark) {
+			for ( $i = 0; $i < 3; $i++) {
+				array_push($backs, 'assets/img/cards/back.png');
+			}
+		}
+		return $backs;
+	}
+
 }

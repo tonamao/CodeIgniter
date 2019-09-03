@@ -18,6 +18,7 @@ class Daifugo extends CI_Controller {
 	public function daifugo()
 	{
 		$data['cards'] = $this->cardController->initCard();
+		$data['backs'] = $this->cardController->getCardBack();
 		$this->load->view('daifugo/daifugo', $data);
 	}
 }
