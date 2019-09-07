@@ -11,13 +11,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </head>
 <body>
 	<div class="cpu-area">
-      <?php for($i = 0; $i < 3; $i++) {
-      	$num = ($i + 1);?>
-		    <div class="cpu <?php echo $num ?>">CPU<?php echo $num ?>
+      <?php for($i = 0; $i < count($cpuCardLists); $i++) {
+      	$cpuNo = ($i + 1);?>
+		    <div class="cpu <?php echo $cpuNo ?>">CPU<?php echo $cpuNo ?>
 				<div class="hand">
-					<?php foreach ($backs as $back): ?>
-						<?php 
-						$card_prop = array(
+					<?php foreach ($cpuCardLists[$i] as $cCard) :?>
+						<?php $card_prop = array(
 											'src' => $back,
 											'width' => '40',
 											'height' => 'auto'
@@ -51,7 +50,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <a href="#" class="btn-square-so-pop">パス</a>
                 </div>
 		<div class="hand">
-			<?php foreach ($cards as $card): ?>
+			<?php foreach ($userCardList as $card): ?>
 				<?php 
 				$card_prop = array(
 									'src' => $card,
@@ -77,5 +76,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			</div>
 		</div>
 	</div>
+	<div>テスト</div>
+	<div>
+		<div>CPU1 <?php echo count($cpuCardLists[0])?>枚</div>
+			<?php foreach ($cpuCardLists[0] as $card): ?>
+				<?php echo $card; ?>
+			<?php endforeach; ?>
+		<div>CPU2 <?php echo count($cpuCardLists[1])?>枚</div>
+			<?php foreach ($cpuCardLists[1] as $card): ?>
+				<?php echo $card; ?>
+			<?php endforeach; ?>
+		<div>CPU3 <?php echo count($cpuCardLists[2])?>枚</div>
+			<?php foreach ($cpuCardLists[2] as $card): ?>
+				<?php echo $card; ?>
+			<?php endforeach; ?>
+	</div>
+	<div>テスト</div>
 </body>
 </html>
