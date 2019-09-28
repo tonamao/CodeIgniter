@@ -5,7 +5,12 @@ class CardController extends CI_Model {
 
 	public function __construct() {
 		$this->load->helper('url_helper');
-		
+		$this->load->database();
+	}
+
+	public function testDb() {
+		$query = $this->db->query('SELECT * FROM card');
+		return $query->result_array();
 	}
 
 	public function getCardsInOrder(){
