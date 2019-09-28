@@ -64,6 +64,10 @@ html,body{
     height: 45%;
 }
 
+.user-area .hand > img{
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
 
 .status {
 	display: inline-block;

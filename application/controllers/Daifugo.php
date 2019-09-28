@@ -12,6 +12,7 @@ class Daifugo extends CI_Controller {
 		$this->load->helper('html');
 		$this->load->model('cardController');
 		Daifugo::$INIT_CARDS = $this->cardController->getCardsInOrder();
+
 	}
 
 	public function daifugo()
@@ -27,5 +28,12 @@ class Daifugo extends CI_Controller {
 
 		$data['back'] = $this->cardController->getCardBack();
 		$this->load->view('daifugo/daifugo', $data);
+
+	}
+
+	public function init() {
+		//get card from db as list and randomly push to list
+		echo $this->cardController->testDb();
+		//
 	}
 }
