@@ -28,17 +28,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
       <?php }?>
 	</div>
 	<div class="game-area">
-		<div class="cards">
-	      	<?php for($i = 0; $i < 2; $i++) {?>
-				<div class="card img" style="z-index:<?php echo $cnt = $i + 1;?>; left:<?php echo $left = 42 + 4*$cnt; ?>%; top:<?php echo $top = 18 + 8*$cnt ?>%;">
-					<?php 
-					$cnt = $i + 1;
-					$position = 100/(54/4 + 10)*$cnt;
-						$card_prop = array(
-										'src' => 'assets/img/cards/spade_1.png',
-										'width' => '90',
-										'height' => 'auto'
-									);
+		<div class="cards" id="game-cards">
+	      	<?php for($i = 0; $i < 4; $i++) {?>
+	      		<?php 
+	      			$index = $i + 1;
+	      			$l = 0;
+	      			$t = 0;
+	      			if ($index % 2 == 0) {
+	      				$l = "50%";
+	      				$t = "26%";
+	      				if ($index % 4 == 0) {
+	      					$l = "42%";
+	      					$t = "30%";
+	      				}
+	      			} else {
+	      				$l = "44%";
+	      				$t = "auto";
+	      				if ($index % 3 == 0) {
+	      					$l = "48%";
+	      					$t = "36%";
+	      				}
+	      			}
+	      		?>
+				<div class="card img" id="location-<?php echo $index;?>"
+					style="z-index:<?php echo $index;?>;
+							left:<?php echo $l; ?>;
+							top:<?php echo $t ?>;">
+					<?php
+					$card_prop = array(
+									'src' => 'assets/img/cards/spade_1.png',
+									'id' => 'img-location-'."$index",
+									'width' => '90',
+									'height' => 'auto'
+								);
 					echo img($card_prop); ?>
 				</div>
 	      	<?php }?>
@@ -46,14 +68,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</div>
 	<div class="user-area">
                 <div class="btn">
-                    <a href="#" class="btn-square-so-pop">出す</a>
-                    <a href="#" class="btn-square-so-pop">パス</a>
+                    <a href="#" id="put" class="btn-square-so-pop">出す</a>
+                    <a href="#" id="pass" class="btn-square-so-pop">パス</a>
                 </div>
-		<div class="hand">
+		<div class="hand" id="user-hand">
+			<!-- <input type="checkbox" class="select-img"> -->
+			<?php $index = 0; ?>
 			<?php foreach ($userCardList as $card): ?>
 				<?php 
 				$card_prop = array(
 									'src' => $card,
+									'id' => 'img'.$index++,
 									'width' => '90',
 									'height' => 'auto'
 							);
@@ -92,5 +117,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<?php endforeach; ?>
 	</div>
 	<div>テスト</div>
+	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/daifugo.js"></script>
 </body>
 </html>
