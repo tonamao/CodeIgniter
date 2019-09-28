@@ -20,13 +20,29 @@ class CardController extends CI_Model {
 				array_push($CardArray, 'assets/img/cards/'.$mark.'_'.($i + 1).'.png');
 			}
 		}
-		array_push($CardArray, 'assets/img/cards/joker.png');
-		array_push($CardArray, 'assets/img/cards/joker.png');
+		array_push($CardArray, 'assets/img/cards/joker_1.png');
+		array_push($CardArray, 'assets/img/cards/joker_2.png');
 		return $CardArray;
 	}
 
 	//最初に配られるカードをプレイヤー数分Listにして返却
-	public function getRandomCardsList($player_num, $cardsInOrder) {
+	/**
+	 * @param int $player_num [num of player]
+	 * 
+	 * @return Array $initCardList
+	 */
+	public function getRandomCardsList($player_num) {
+		//DBから取得したカードを順番にimgパスとしてListに詰める
+		$cardsInOrder = array();
+		$query = $this->db->query('SELECT card_img FROM card');
+		$dbCardsList = $query->result_array();
+		foreach ($query->result() as $row) {
+			if(($val = $row->card_img) != 'back'){
+				$imgPath = 'assets/img/cards/'.$val.'.png';
+				array_push($cardsInOrder, $imgPath);
+			}
+		}
+
 		//順番に並んだカードをランダムに並べ変えてプレイヤーごとにListにする
 		$firstCardsList = array();
 		$selectedNo = array();

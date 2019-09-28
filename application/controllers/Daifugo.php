@@ -17,8 +17,8 @@ class Daifugo extends CI_Controller {
 
 	public function daifugo()
 	{
-		$cardInOrder = $this->cardController->getCardsInOrder();
-		$allRandomCardList = $this->cardController->getRandomCardsList(4, $cardInOrder);
+		// $cardInOrder = $this->cardController->getCardsInOrder();
+		$allRandomCardList = $this->cardController->getRandomCardsList(4);
 		$data['userCardList'] = $allRandomCardList[0];
 		$data['cpuCardLists'] = array();
 		$numOfCpu = 3;
