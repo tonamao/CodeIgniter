@@ -1,32 +1,31 @@
 <?php
 class CardController extends CI_Model {
 
-	public static $MARKS = ['club', 'diamond', 'heart', 'spade'];
+	public static $TRUMP = null;
+	public static $DAIFUGO;
 
 	public function __construct() {
 		$this->load->helper('url_helper');
-		$this->load->database();
-	}
-
-	public function testDb() {
-		$query = $this->db->query('SELECT * FROM card');
-		return $query->result_array();
-	}
-
-	public function getCardsInOrder(){
-		$CardArray = array();
-		foreach (CardController::$MARKS as $mark) {
-			for ($i = 0; $i < 13; $i++) {
-				array_push($CardArray, 'assets/img/cards/'.$mark.'_'.($i + 1).'.png');
-			}
-		}
-		array_push($CardArray, 'assets/img/cards/joker.png');
-		array_push($CardArray, 'assets/img/cards/joker.png');
-		return $CardArray;
+		CardController::$TRUMP = $this->load->database('default',true);
+		CardController::$DAIFUGO = $this->load->database('daifugo', true);
 	}
 
 	//最初に配られるカードをプレイヤー数分Listにして返却
-	public function getRandomCardsList($player_num, $cardsInOrder) {
+	/**
+	 * @param int $player_num [num of player]
+	 * 
+	 * @return Array $initCardList
+	 */
+	public function getRandomCardsList($player_num) {
+		//DBから取得したカードを順番にimgパスとしてListに詰める
+		$cardsInOrder = array();
+		$query = CardController::$TRUMP->query('SELECT card_id FROM card');
+		foreach ($query->result() as $row) {
+			if(($val = $row->card_id) != '55'){
+				array_push($cardsInOrder, $val);
+			}
+		}
+
 		//順番に並んだカードをランダムに並べ変えてプレイヤーごとにListにする
 		$firstCardsList = array();
 		$selectedNo = array();
@@ -89,19 +88,29 @@ class CardController extends CI_Model {
 		return $firstCardsList;
 	}
 
-	public function initCard() {
-		
-		$cards = array();
-		foreach (CardController::$marks as $mark) {
-			for ( $i = 0; $i < 3; $i++) {
-				array_push($cards, 'assets/img/cards/'.$mark.'_'.($i + 1).'.png');
-			}
-		}
-		return $cards;
-	}
-
 	public function getCardBack() {
 		return 'assets/img/cards/back.png';
 	}
 
+	public function insertCards($gameNo, $cardLists) {
+		$cnt = 0;
+		foreach ($cardLists as $cardList) {
+			$id = $cnt + 1;
+			foreach ($cardList as $card) {
+				$cardData = array(
+					'player_id' => $id,
+					'card_id' => $card,
+					'game_id' => $gameNo,
+					'used_flg' => false
+				);
+				CardController::$DAIFUGO->insert('daifugo_card', $cardData);
+			}
+			$cnt++;
+		}
+	}
+
+	public function toImgPath($id) {
+		$query = CardController::$TRUMP->get_where('card', array('card_id' => $id));
+		return 'assets/img/cards/'.$query->row()->card_img.'.png';
+	}
 }
