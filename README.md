@@ -1,6 +1,7 @@
 # CodeIgniter
-My First CI Project.  
-I will make some games.
+My First CodeIgniter Project.  
+Create various games with codeigniter.
+
 ## Contents
 1. ”Daifugo”  
 2.  
