@@ -11,17 +11,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </head>
 <body>
 	<div class="cpu-area">
-      <?php for($i = 0; $i < count($cpuCardLists); $i++) {
-      	$cpuNo = ($i + 1);?>
-		    <div class="cpu <?php echo $cpuNo ?>">CPU<?php echo $cpuNo ?>
+      <?php for($i = 1; $i < count($hands); $i++) {?>
+		    <div class="cpu <?php echo $i ?>">CPU<?php echo $i ?>
 				<div class="hand">
-					<?php foreach ($cpuCardLists[$i] as $cCard) :?>
-						<?php $card_prop = array(
-											'src' => $back,
-											'width' => '40',
-											'height' => 'auto'
-									);
-						echo img($card_prop); ?>
+					<?php foreach ($hands[$i] as $key => $idPath) :?>
+						<?php foreach ($idPath as $id => $path) :?>
+							<?php $card_prop = array(
+												'src' => $back,
+												'id' => $id,
+												'width' => '40',
+												'height' => 'auto'
+										);
+							echo img($card_prop); ?>
+						<?php endforeach; ?>
 					<?php endforeach; ?>
 				</div>
 			</div>
@@ -67,22 +69,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	    </div>
 	</div>
 	<div class="user-area">
-                <div class="btn">
-                    <a href="#" id="put" class="btn-square-so-pop">出す</a>
-                    <a href="#" id="pass" class="btn-square-so-pop">パス</a>
-                </div>
-		<div class="hand" id="user-hand">
-			<!-- <input type="checkbox" class="select-img"> -->
-			<?php $index = 0; ?>
-			<?php foreach ($userCardList as $card): ?>
-				<?php 
-				$card_prop = array(
-									'src' => $card,
-									'id' => 'img'.$index++,
-									'width' => '90',
-									'height' => 'auto'
-							);
-				echo img($card_prop); ?>
+		<?php echo form_open('daifugo/put'); ?>
+            <input type="submit" name="put" id="put" class="btn-square-so-pop" value="出す">
+            <input type="hidden" name="hidden-put" id="hidden-put">
+            <input type="submit" name="pass" id="pass" class="btn-square-so-pop" value="パス">
+        </form>
+            <!-- <form class="btn" action="#" method="post">
+                <a href="#" id="put" class="btn-square-so-pop">出す</a>
+                <a href="#" id="pass" class="btn-square-so-pop">パス</a>
+            </form> -->
+	<div class="hand" id="user-hand">
+			<?php $i = 0;
+			foreach ($hands[0] as $key => $idPath): ?>
+				<?php foreach ($idPath as $id => $path) :?>
+					<?php $card_prop = array(
+										'src' => $path,
+										'id' => 'img'.$id,
+										'class' => 'img'.$i++,
+										'width' => '90',
+										'height' => 'auto'
+								);
+					echo img($card_prop); ?>
+				<?php endforeach; ?>
 			<?php endforeach; ?>
 		</div>
 		<div class="status">
@@ -103,17 +111,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</div>
 	<div>テスト</div>
 	<div>
-		<div>CPU1 <?php echo count($cpuCardLists[0])?>枚</div>
-			<?php foreach ($cpuCardLists[0] as $card): ?>
-				<?php echo $card; ?>
+		<div>CPU1 <?php echo count($hands[1])?>枚</div>
+			<?php foreach ($hands[1] as $key => $idPath): ?>
+				<?php foreach ($idPath as $id => $path): ?>
+					<?php echo $path; ?>
+				<?php endforeach; ?>
 			<?php endforeach; ?>
-		<div>CPU2 <?php echo count($cpuCardLists[1])?>枚</div>
-			<?php foreach ($cpuCardLists[1] as $card): ?>
-				<?php echo $card; ?>
+		<div>CPU2 <?php echo count($hands[2])?>枚</div>
+			<?php foreach ($hands[2] as $key => $idPath): ?>
+				<?php foreach ($idPath as $id => $path): ?>
+					<?php echo $path; ?>
+				<?php endforeach; ?>
 			<?php endforeach; ?>
-		<div>CPU3 <?php echo count($cpuCardLists[2])?>枚</div>
-			<?php foreach ($cpuCardLists[2] as $card): ?>
-				<?php echo $card; ?>
+		<div>CPU3 <?php echo count($hands[3])?>枚</div>
+			<?php foreach ($hands[3] as $key => $idPath): ?>
+				<?php foreach ($idPath as $id => $path): ?>
+					<?php echo $path; ?>
+				<?php endforeach; ?>
 			<?php endforeach; ?>
 	</div>
 	<div>テスト</div>
