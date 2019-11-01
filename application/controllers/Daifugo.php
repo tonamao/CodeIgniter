@@ -2,41 +2,56 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Daifugo extends CI_Controller {
+	public static $usedId = 1;
 
 	public function __construct(){
 		parent::__construct();
 		$this->load->helper('url_helper');
 		$this->load->helper('html');
 		$this->load->model('cardController');
+		$this->load->helper('form');
+		$this->load->library('form_validation');
 
 	}
 
-	public function daifugo()
-	{
-		//最初の手札として、プレイヤー分のcardListを取得
-		$allRandomCardList = $this->cardController->getRandomCardsList(4);
-		
-		//最初の手札をDBに登録
-		$this->cardController->insertCards(1, $allRandomCardList);
-		
-		//手札がidなので、img pathに変換
-		$idArray = array();
-		for ($i = 0; $i < count($allRandomCardList); $i++) {
-			foreach ($allRandomCardList[$i] as $key => &$value) {
-				$value = $this->cardController->toImgPath($value);
-			}
-		}
-
-		//0番目がユーザのList、1～3がCPU1～3のList
-		$data['userCardList'] = $allRandomCardList[0];
-		$data['cpuCardLists'] = array();
-		$numOfCpu = 3;
-		for ($i = 0; $i < $numOfCpu; $i++) {
-			array_push($data['cpuCardLists'], $allRandomCardList[($i + 1)]);
-		}
-
-		//裏向きのimgPath設定
+	/**
+	 * 最初のカードのを表示する
+	 * ⇒54枚のカードからランダムに手札を配る
+	 * ⇒手札をDBに登録する
+	 * ⇒手札を画面に表示する
+	 */
+	public function start() {
+		//全プレイヤーの手札(hand)を取得
+		$playerNum = 4;
+		$allHandLists = $this->cardController->getFirstHandLists($playerNum);
+		//手札をDBに登録
+		$gameNum = 1;
+		$this->cardController->insertHands($gameNum, $allHandLists);
+		//手札をdataに入れる
+		$data['hands'] = $allHandLists;
 		$data['back'] = $this->cardController->getCardBack();
+		$this->load->view('daifugo/daifugo', $data);
+	}
+
+	/**
+	 * ユーザーが手札を場に出す
+	 */
+	public function put() {
+		$selectingCards = $this->input->post('hidden-put');
+		$gameNum = 1;
+		$playerNum = 4;
+		//出そうとしてるカードがruleに合ってるかチェックする
+		if ($this->cardController->checkCards($selectingCards)) {
+			//used_flgを有効"TRUE"にして更新する
+			$this->cardController->useCard($gameNum, $selectingCards, Daifugo::$usedId++);
+		}
+		$data['hands'] = $this->cardController->getHandLists($gameNum, $playerNum);
+		$data['back'] = $this->cardController->getCardBack();
+
+		//場のカードを表示
+		$data['used'] = $this->cardController->getUsedCard($gameNum);
+
+		//再表示
 		$this->load->view('daifugo/daifugo', $data);
 	}
 }

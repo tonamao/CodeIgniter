@@ -1,90 +1,28 @@
 (function() {
 	var userHand = document.getElementById("user-hand");
-	var imgNum = userHand.childElementCount;
+	var userHandNum = userHand.childElementCount;
 
-	//user-btn event
+	//ボタンクリックイベント
 	document.getElementById("put").addEventListener('click', put, false);
 	document.getElementById("pass").addEventListener('click', pass, false);
 
-	function put() {
-		var puttable = checkCards();
-		if (puttable) {
-			var selectedCards = getSelectedCards();
-			putSelectedCards(selectedCards);
-			deleteHands(selectedCards);
-		}
-	}
-
-	function pass() {
-		console.log("PASS");
-	}
-
-	function checkCards() {
-		//TODO: 選択してるカードが出せるカードかチェック
-		return true;
-	}
-
-	function getSelectedCards() {
-		var targetCards = [];
-		for (var i = 0 ; i < imgNum; i++) {
-			var target = document.getElementById("img" + i);
-			if (target != null) {
-				var tgtStyle = target.style.fontWeight;
-				if (tgtStyle == "bold") {
-					targetCards.push(target);
-				}	
-			}
-		}
-		console.log(targetCards);
-		return targetCards;
-	}
-
-	function putSelectedCards(selectedCards) {
-		//TODO:複数枚の配置が決まってない
-		for (var card of selectedCards) {
-			
-			console.log(card);
-		}
-	}
-
-	function deleteHands(selectedCards) {
-		//TODO:複数枚の配置が決まってない
-		var hands = userHand.children;
-		for (var card of selectedCards) {
-			for (var c of hands) {
-				if(c.style.fontWeight == "bold" && c.style.fontWeight == card.style.fontWeight) {
-					c.remove();
-				}
-			}
-		}
-	}
-
-	//user-hands event
-	for (var i = 0; i < imgNum; i++) {
-		var selectFlg = [];
+	/**
+	 * ユーザの手札に対するイベント
+	 * 1クリックでカードを囲む、2クリックで枠解除
+	 */
+	var selectFlg = [];
+	for (var i = 0; i < userHandNum; i++) {
 		selectFlg[i] = false;
 
 		(function(n) {
-			document.getElementById("img" + n).addEventListener('click', function() {
+			document.getElementsByClassName("img" + n)[0].addEventListener('click', function() {
 				if (!selectFlg[n]) {
-					//1枚しか選べないテストコード
-					var hands = userHand.children;
-					for (var j = 0; j < imgNum; j++) {
-						for (var c of hands) {
-							if (c.id == ("img" + j)) {
-								if (document.getElementById("img" + j).style.fontWeight == "bold"){
-									document.getElementById("img" + j).style.fontWeight = "";
-									document.getElementById("img" + j).style.border = "";
-								}
-							}
-						}
-					}
-					document.getElementById("img" + n).style.fontWeight = "bold";
-					document.getElementById("img" + n).style.border = "solid 3px #754F44";
+					document.getElementsByClassName("img" + n)[0].style.fontWeight = "bold";
+					document.getElementsByClassName("img" + n)[0].style.border = "solid 3px #754F44";
 					selectFlg[n] = true;
-				}else{
-					document.getElementById("img" + n).style.fontWeight = "";
-					document.getElementById("img" + n).style.border = "";
+				} else {
+					document.getElementsByClassName("img" + n)[0].style.fontWeight = "";
+					document.getElementsByClassName("img" + n)[0].style.border = "";
 					selectFlg[n] = false;	
 				}
 			}, false);
@@ -92,4 +30,43 @@
 	}
 
 
+	/**
+	 * 1.クリックしたカードの枠を付ける
+	 * 2.hidden-putに選択したカードのidを渡す(id, id, ...)
+	 */
+	function put() {
+		var selectedCardElements = getSelectedCards();
+		var selectCardIdStr = "";
+		for (var i = 0; i < selectedCardElements.length; i++) {
+			if ((selectedCardElements.length - 1) == i) {
+				selectCardIdStr += selectedCardElements[i].id.slice(3);
+			}else{
+				selectCardIdStr += selectedCardElements[i].id.slice(3) + ",";	
+			}
+		}
+		document.getElementById("hidden-put").value = selectCardIdStr;
+	}
+
+	//TODO : 
+	function pass() {
+		console.log("PASS");
+	}
+
+	/**
+	 * 選択しているカードを返す
+	 * @return array [selected cards]
+	 */
+	function getSelectedCards() {
+		var targetCards = [];
+		for (var i = 0 ; i < userHandNum; i++) {
+			var target = document.getElementsByClassName("img" + i)[0];
+			if (target != null) {
+				var tgtStyle = target.style.fontWeight;
+				if (tgtStyle == "bold") {
+					targetCards.push(target);
+				}	
+			}
+		}
+		return targetCards;
+	}
 })();
