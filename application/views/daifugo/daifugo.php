@@ -11,10 +11,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </head>
 <body>
 	<div class="cpu-area">
-      <?php for($i = 1; $i < count($hands); $i++) {?>
+      <?php for($i = 1; $i < count($all_hands); $i++) {?>
 		    <div class="cpu <?php echo $i ?>">CPU<?php echo $i ?>
 				<div class="hand">
-					<?php foreach ($hands[$i] as $key => $idPath) :?>
+					<?php foreach ($all_hands[$i] as $key => $idPath) :?>
 						<?php foreach ($idPath as $id => $path) :?>
 							<?php $card_prop = array(
 												'src' => $back,
@@ -80,7 +80,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </form> -->
 	<div class="hand" id="user-hand">
 			<?php $i = 0;
-			foreach ($hands[0] as $key => $idPath): ?>
+			foreach ($all_hands[0] as $key => $idPath): ?>
 				<?php foreach ($idPath as $id => $path) :?>
 					<?php $card_prop = array(
 										'src' => $path,
@@ -111,20 +111,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	</div>
 	<div>テスト</div>
 	<div>
-		<div>CPU1 <?php echo count($hands[1])?>枚</div>
-			<?php foreach ($hands[1] as $key => $idPath): ?>
+		<div>CPU1 <?php echo count($all_hands[1])?>枚</div>
+			<?php foreach ($all_hands[1] as $key => $idPath): ?>
 				<?php foreach ($idPath as $id => $path): ?>
 					<?php echo $path; ?>
 				<?php endforeach; ?>
 			<?php endforeach; ?>
-		<div>CPU2 <?php echo count($hands[2])?>枚</div>
-			<?php foreach ($hands[2] as $key => $idPath): ?>
+		<div>CPU2 <?php echo count($all_hands[2])?>枚</div>
+			<?php foreach ($all_hands[2] as $key => $idPath): ?>
 				<?php foreach ($idPath as $id => $path): ?>
 					<?php echo $path; ?>
 				<?php endforeach; ?>
 			<?php endforeach; ?>
-		<div>CPU3 <?php echo count($hands[3])?>枚</div>
-			<?php foreach ($hands[3] as $key => $idPath): ?>
+		<div>CPU3 <?php echo count($all_hands[3])?>枚</div>
+			<?php foreach ($all_hands[3] as $key => $idPath): ?>
 				<?php foreach ($idPath as $id => $path): ?>
 					<?php echo $path; ?>
 				<?php endforeach; ?>
