@@ -26,7 +26,7 @@ class Daifugo extends CI_Controller {
 		// $this->cardController->insertDaifugoMatching();//TODO: insertDaifugoMatching()
 
 		//get all player's hands
-		$playerNum = 4;//$this->cardController->getNumOfPlayer();//TODO: getNumOfPlayer()
+		$playerNum = $this->cardController->getNumOfPlayer();
 		$data['all_hands'] = $this->cardController->getFirstHandsLists($playerNum);
 		$data['back'] = $this->cardController->getCardBack();
 
