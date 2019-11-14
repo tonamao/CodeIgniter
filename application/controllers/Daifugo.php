@@ -15,28 +15,77 @@ class Daifugo extends CI_Controller {
 	}
 
 	/**
-	 * 最初のカードのを表示する
-	 * ⇒54枚のカードからランダムに手札を配る
-	 * ⇒手札をDBに登録する
-	 * ⇒手札を画面に表示する
+	 * Insert daifugo_matching.
+	 * Hand out cards.
+	 * Check player's class & exchange cards.
+	 * Insert daifugo_hand.
+	 * Display first player hands.
 	 */
 	public function start() {
-		//全プレイヤーの手札(hand)を取得
-		$playerNum = 4;
-		$allHandLists = $this->cardController->getFirstHandLists($playerNum);
-		//手札をDBに登録
-		$gameNum = 1;
-		$this->cardController->insertHands($gameNum, $allHandLists);
-		//手札をdataに入れる
-		$data['hands'] = $allHandLists;
+		//TODO: insert daifugo_matching(insert num of player records)
+		// $this->cardController->insertDaifugoMatching();//TODO: insertDaifugoMatching()
+
+		//get all player's hands
+		$playerNum = $this->cardController->getNumOfPlayer();
+		$data['all_hands'] = $this->cardController->getFirstHandsLists($playerNum);
 		$data['back'] = $this->cardController->getCardBack();
+
+		//TODO: check player's class & exchange cards -> update hand DB
+
 		$this->load->view('daifugo/daifugo', $data);
 	}
 
 	/**
-	 * ユーザーが手札を場に出す
+	 * 
 	 */
 	public function put() {
+		//TODO: check card according to rules
+		//true insert
+		//false view
+
+		//TODO: insert DB
+		//update hand
+
+		//insert daifugo_game_manager
+
+		//insert user_status
+
+		//insert game_history
+
+		//TODO: check user end
+
+		//TODO: check game end 
+
+		//TODO: if game is end, update DB
+		//update matching
+
+		//insert game_result
+
+		//TODO: view
+
+	}
+
+	/**
+	 * 
+	 */
+	public function pass() {
+		//TODO: insert DB
+		//insert game_manager
+
+		//insert user_status
+
+		//insert game_history(null?)
+
+		//TODO: view
+	}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * ユーザーが手札を場に出す
+	 */
+	public function oldput() {
 		$selectingCards = $this->input->post('hidden-put');
 		$gameNum = 1;
 		$playerNum = 4;

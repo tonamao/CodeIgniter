@@ -7,30 +7,36 @@ class CardController extends CI_Model {
 	public function __construct() {
 		$this->load->helper('url_helper');
 		
+		//TODO: database.phpを直す
 		CardController::$TRUMP = $this->load->database('default',true);
 		CardController::$DAIFUGO = $this->load->database('daifugo', true);
 	}
 
 	/**
+	 * Get first player's hands.
+	 * Insert 'daifugo_hand' DB.
+	 * 
 	 * @param int $playerNum
 	 * @return Array $allHandLists 
 	 * 			[0] : user, [1~$playerNum]: cpu
-	 * 			array([0] => ('card id' => 'card img path'),
-	 * 				  [1] => ('card id' => 'card img path'),...)
+	 * 			[0] => Array (
+	 *				[0] => Array ( [37] => assets/img/cards/heart_11.png )
+	 * 				[1] => Array ( [26] => assets/img/cards/diamond_13.png )...
+	 * 				[n] => Array ( {card id} => {card img path})
+	 *			)...
 	 */
-	public function getFirstHandLists($playerNum) {
+	public function getFirstHandsLists($playerNum) {
 		//全カードを順番にListに詰める
+		//[0]=>1 [1]=>2 [2]=>3...
 		$cardsInOrder = array();
-		$query = CardController::$TRUMP->query('SELECT card_id FROM card');
+		$query = CardController::$DAIFUGO->query('SELECT card_id FROM ms_trump_card');
 		foreach ($query->result() as $row) {
-			if(($val = $row->card_id) != '55'){
-				array_push($cardsInOrder, $val);
-			}
+			array_push($cardsInOrder, $row->card_id);
 		}
 
-		//ランダムに並べ変えてプレイヤーごとの手札をListにする
-		$allUserCardsList = array();
-		$selectedNo = array();
+		//ランダムに並べ変えてプレイヤーごとに手札をListにする
+		$allPlayerCardsList = array();
+		$selectedCard = array();
 		for ($i = 0; $i < $playerNum; $i++) {
 			//一人分のカードを格納するリスト
 			$singleCards = array();
@@ -38,30 +44,24 @@ class CardController extends CI_Model {
 			while ($cnt < floor(54/$playerNum)) {
 				$randomIndex = rand(0, 53);
 
-				if (count($selectedNo) == 0) {//1回目
+				if (count($selectedCard) == 0) {//1回目
 					//ランダムで選んだcard_id => $cardsInOrder[$randomIndex]
 					$id = $cardsInOrder[$randomIndex];
-					$query = CardController::$TRUMP->get_where('card', array('card_id' => $id));
-					$path = 'assets/img/cards/'.$query->row()->card_img.'.png';
-					$idPath = array("$id" => "$path");
-					array_push($singleCards, $idPath);
-					array_push($selectedNo, $randomIndex);
+					array_push($singleCards, $id);
+					array_push($selectedCard, $randomIndex);
 					$cnt++;
 				} else {//2回目以降
-					//すでに選んだインデックスと被らないように判定する
-					$IsfoundSameNo = in_array($randomIndex, $selectedNo);
-					if (!$IsfoundSameNo) {//すでに選んだインデックスと被ってなかったら
+					//すでに選んだカードと被らないように判定する
+					$IsSelectedCard = in_array($randomIndex, $selectedCard);
+					if (!$IsSelectedCard) {//すでに選んだカードと被ってなかったら
 						$id = $cardsInOrder[$randomIndex];
-						$query = CardController::$TRUMP->get_where('card', array('card_id' => $id));
-						$path = 'assets/img/cards/'.$query->row()->card_img.'.png';
-						$idPath = array("$id" => "$path");
-						array_push($singleCards, $idPath);
-						array_push($selectedNo, $randomIndex);
+						array_push($singleCards, $id);
+						array_push($selectedCard, $randomIndex);
 						$cnt++;
 					}
 				}
 			}
-			array_push($allUserCardsList, $singleCards);
+			array_push($allPlayerCardsList, $singleCards);
 		};
 
 		//余りがある場合は余りをランダムにプレイヤーに振り分ける
@@ -69,7 +69,7 @@ class CardController extends CI_Model {
 			//余ったカードをListにつめる
 			$restCardList = array();
 			for ($i = 0; $i < 54; $i++) {
-				$isContained = in_array($i, $selectedNo);
+				$isContained = in_array($i, $selectedCard);
 				if (!$isContained) {
 					array_push($restCardList, $cardsInOrder[$i]);
 				}
@@ -83,10 +83,7 @@ class CardController extends CI_Model {
 
 				if (count($selectedPlayers) == 0) {//1回目
 					$id = $restCardList[$cnt];
-					$query = CardController::$TRUMP->get_where('card', array('card_id' => $id));
-					$path = 'assets/img/cards/'.$query->row()->card_img.'.png';
-					$restIdPath = array("$id" => "$path");
-					array_push($allUserCardsList[$randomPlayerIndex], $restIdPath);
+					array_push($allPlayerCardsList[$randomPlayerIndex], $id);
 					array_push($selectedPlayers, $randomPlayerIndex);
 					$cnt++;
 					$cardIndex++;
@@ -94,10 +91,7 @@ class CardController extends CI_Model {
 					$IsfoundSameNo = in_array($randomPlayerIndex, $selectedPlayers);
 					if (!$IsfoundSameNo) {
 						$id = $restCardList[$cnt];
-						$query = CardController::$TRUMP->get_where('card', array('card_id' => $id));
-						$path = 'assets/img/cards/'.$query->row()->card_img.'.png';
-						$restIdPath = array("$id" => "$path");
-						array_push($allUserCardsList[$randomPlayerIndex], $restIdPath);
+						array_push($allPlayerCardsList[$randomPlayerIndex], $id);
 						array_push($selectedPlayers, $randomPlayerIndex);
 						$cnt++;
 						$cardIndex++;
@@ -105,49 +99,58 @@ class CardController extends CI_Model {
 				}
 			}
 		}
-		return $allUserCardsList;
-	}
+		//TODO output hand list($allPlayerCardsList) log
 
-	/**
-	 * @param int $gameNum, array $allHandLists
-	 * すべてのプレイヤーの手札をDBに登録する
-	 */
-	public function insertHands($gameNum, $allHandLists) {
-
-		foreach ($allHandLists as $playerId => $playerHands) {
-			foreach ($playerHands as $key => $idPath) {
-				foreach ($idPath as $cardId => $path) {
-					$cardData = array(
-						'player_id' => $playerId,
-						'card_id' => $cardId,
-						'game_id' => $gameNum,
-						'used_id' => 0,
-						'discard_flg' => false
-					);
-					CardController::$DAIFUGO->insert('daifugo_card', $cardData);
-				}
+		//insert DB
+		//TODO get game_id from 'daifugo_matching'
+		$gameId = 1;
+		foreach ($allPlayerCardsList as $playerId => $playerHandArray) {
+			foreach ($playerHandArray as $key => $id) {
+				$cardData = array(
+					'game_id' => $gameId,
+					'user_id' => $playerId,
+					'card_id' => $id,
+					'used_flg' => false
+				);
+				CardController::$DAIFUGO->insert('daifugo_hand', $cardData);
 			}
 		}
+		//TODO output result of insert DB log
+
+		//convert id array to id & card img path array;
+		$imgPathListOfHands = array();
+		for ($i = 0; $i < $playerNum; $i++) {
+			$handQuery = CardController::$DAIFUGO->get_where(
+					'daifugo_hand', array('user_id' => $i));
+			$singleHand = array();
+			foreach ($handQuery->result() as $handRow) {
+				$cardId = $handRow->card_id;
+				// $cardQuery = CardController::$DAIFUGO->query("SELECT card_id, card_name FROM ms_trump_card");
+				$cardQuery = CardController::$DAIFUGO->get_where(
+					'ms_trump_card', array('card_id' => $cardId));
+				$idPath = array($cardId => 'assets/img/cards/'.$cardQuery->row()->card_name.'.png');
+				array_push($singleHand, $idPath);
+			}
+			array_push($imgPathListOfHands, $singleHand);
+		}
+		return $imgPathListOfHands;
 	}
 
+
 	/**
+	 * Return img path of card's back.
 	 * @return String path of card's back
-	 * カードの裏面のパスを出す
 	 */
 	public function getCardBack() {
 		return 'assets/img/cards/back.png';
 	}
 
-	//TODO: 
-	/**
-	 * @return 
-	 * 
-	 */
-	public function checkCards($selectingCards) {
-		//ルールをチェックする
-		return true;
+	//TODO get num of players from daifugo_matching
+	public function getNumOfPlayer() {
+		return 4;
 	}
 
+////////////////////////////////////////////////////////////
 	//TODO: used_idを動的に
 	/**
 	 * 場に出したカードを使用済みとして、used_idをtrueで更新する
