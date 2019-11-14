@@ -133,7 +133,6 @@ class CardController extends CI_Model {
 			}
 			array_push($imgPathListOfHands, $singleHand);
 		}
-		// log_message('debug', print_r($imgPathListOfHands, true));
 		return $imgPathListOfHands;
 	}
 
@@ -144,6 +143,11 @@ class CardController extends CI_Model {
 	 */
 	public function getCardBack() {
 		return 'assets/img/cards/back.png';
+	}
+
+	//TODO get num of players from daifugo_matching
+	public function getNumOfPlayer() {
+		return 4;
 	}
 
 ////////////////////////////////////////////////////////////
