@@ -115,9 +115,11 @@ class GameManager extends CI_Model {
 	 * @return gameStatusId
 	 */
 	public function getLatestGameStatus() {
-		GameManager::$DAIFUGO->select_max('insert_time');
-		GameManager::$DAIFUGO->select_max('game_status_id');
-		$gameStatusId = GameManager::$DAIFUGO->get('daifugo_game_manager')->row()->game_status_id;
+		$latestQuery = GameManager::$DAIFUGO->query('SELECT * FROM daifugo_game_manager WHERE insert_time = (SELECT MAX(insert_time) FROM daifugo_game_manager)');
+		// GameManager::$DAIFUGO->select_max('insert_time');
+		// GameManager::$DAIFUGO->select_max('game_status_id');
+		// $gameStatusId = GameManager::$DAIFUGO->get('daifugo_game_manager')->row()->game_status_id;
+		$gameStatusId = $latestQuery->row()->game_status_id;
 		return $gameStatusId;
 	}
 
