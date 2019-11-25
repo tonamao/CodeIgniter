@@ -1,15 +1,16 @@
 <?php
-class CardController extends CI_Model {
+class CardManager extends CI_Model {
 
 	public static $TRUMP;
 	public static $DAIFUGO;
+	public static $GAME_NAME = 'DFG';
 
 	public function __construct() {
 		$this->load->helper('url_helper');
 		
 		//TODO: database.phpを直す
-		CardController::$TRUMP = $this->load->database('default',true);
-		CardController::$DAIFUGO = $this->load->database('daifugo', true);
+		CardManager::$TRUMP = $this->load->database('default',true);
+		CardManager::$DAIFUGO = $this->load->database('daifugo', true);
 	}
 
 	/**
@@ -29,7 +30,7 @@ class CardController extends CI_Model {
 		//全カードを順番にListに詰める
 		//[0]=>1 [1]=>2 [2]=>3...
 		$cardsInOrder = array();
-		$query = CardController::$DAIFUGO->query('SELECT card_id FROM ms_trump_card');
+		$query = CardManager::$DAIFUGO->query('SELECT card_id FROM ms_trump_card');
 		foreach ($query->result() as $row) {
 			array_push($cardsInOrder, $row->card_id);
 		}
@@ -102,9 +103,13 @@ class CardController extends CI_Model {
 		//TODO output hand list($allPlayerCardsList) log
 
 		//insert DB
-		//TODO get game_id from 'daifugo_matching'
-		$gameId = 1;
-		foreach ($allPlayerCardsList as $playerId => $playerHandArray) {
+		//TODO: user id(from session?)
+		$userId = 'user0';
+		$gameId = CardManager::$DAIFUGO->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		$userIdArray = CardManager::$DAIFUGO->get_where('daifugo_matching', array('game_id' => $gameId))->result_array();
+		foreach ($allPlayerCardsList as $playerIndex => $playerHandArray) {
+			$playerId = $userIdArray[$playerIndex]['user_id'];
+			print_r($playerId, true);
 			foreach ($playerHandArray as $key => $id) {
 				$cardData = array(
 					'game_id' => $gameId,
@@ -112,23 +117,22 @@ class CardController extends CI_Model {
 					'card_id' => $id,
 					'used_flg' => false
 				);
-				CardController::$DAIFUGO->insert('daifugo_hand', $cardData);
+				CardManager::$DAIFUGO->insert('daifugo_hand', $cardData);
 			}
 		}
 		//TODO output result of insert DB log
 
 		//convert id array to id & card img path array;
+		//TODO order card
 		$imgPathListOfHands = array();
 		for ($i = 0; $i < $playerNum; $i++) {
-			$handQuery = CardController::$DAIFUGO->get_where(
-					'daifugo_hand', array('user_id' => $i));
+			$handQuery = CardManager::$DAIFUGO->get_where(
+					'daifugo_hand', array('user_id' => $userIdArray[$i]['user_id']));
 			$singleHand = array();
 			foreach ($handQuery->result() as $handRow) {
 				$cardId = $handRow->card_id;
-				// $cardQuery = CardController::$DAIFUGO->query("SELECT card_id, card_name FROM ms_trump_card");
-				$cardQuery = CardController::$DAIFUGO->get_where(
-					'ms_trump_card', array('card_id' => $cardId));
-				$idPath = array($cardId => 'assets/img/cards/'.$cardQuery->row()->card_name.'.png');
+				$cardName = CardManager::$DAIFUGO->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
+				$idPath = array($cardId => 'assets/img/cards/'.$cardName.'.png');
 				array_push($singleHand, $idPath);
 			}
 			array_push($imgPathListOfHands, $singleHand);
@@ -145,62 +149,47 @@ class CardController extends CI_Model {
 		return 'assets/img/cards/back.png';
 	}
 
-	//TODO get num of players from daifugo_matching
-	public function getNumOfPlayer() {
-		return 4;
-	}
-
-////////////////////////////////////////////////////////////
-	//TODO: used_idを動的に
 	/**
-	 * 場に出したカードを使用済みとして、used_idをtrueで更新する
+	 * update hand as used(used_flg = true)
 	 */
-	public function useCard($gameNum, $selectingCards, $usedId) {
+	public function useCard($userId, $selectingCards) {
+		$table = '';
+		$gameId = CardManager::$DAIFUGO->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		if (strpos($gameId, CardManager::$GAME_NAME) !== false) $table = 'daifugo_hand';
 		$idList = explode(',', $selectingCards);
-		foreach ($idList as $id) {
-		 	CardController::$DAIFUGO->set('used_id', $usedId);
-		 	CardController::$DAIFUGO->where('card_id', $id);
-		 	CardController::$DAIFUGO->update('daifugo_card');
+		foreach ($idList as $cardId) {
+		 	CardManager::$DAIFUGO->set('used_flg', true);
+		 	CardManager::$DAIFUGO->where(array('game_id' => $gameId, 'card_id' => $cardId));
+		 	CardManager::$DAIFUGO->update($table);
 		 }
 	}
 
 	/**
-	 * @param int $gameNum
-	 * @param int $playerNum
+	 * Get all player's hands.
+	 * 
 	 * @return Array $allHandLists 
 	 * 			[0] : user, [1~$playerNum]: cpu
-	 * 			array([0] => ('card id' => 'card img path')...)
-	 * DBの情報から、未使用（used_id==0）のカードを再表示する
+	 * 			[0] => Array (
+	 *				[0] => Array ( [37] => assets/img/cards/heart_11.png )
+	 * 				[1] => Array ( [26] => assets/img/cards/diamond_13.png )...
+	 * 				[n] => Array ( {card id} => {card img path})
+	 *			)...
 	 */
-	public function getHandLists($gameNum, $playerNum) {
-		$handLists = array();
+	public function getLatestHand($playerNum, $userId) {
+		$gameId = CardManager::$DAIFUGO->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		$playerIdArray = CardManager::$DAIFUGO->get_where('daifugo_matching', array('game_id' => $gameId))->result_array();
+		$imgPathListOfHands = array();
 		for ($i = 0; $i < $playerNum; $i++) {
-			$query = CardController::$DAIFUGO->select('card_id')->get_where('daifugo_card', array('game_id' => $gameNum, 'player_id' => $i, 'used_id' => 0));
-			$idList = $query->result();
-			$singleCards = array();
-			foreach ($idList as $row) {
-				$id = $row->card_id;
-				$query = CardController::$TRUMP->get_where('card', array('card_id' => $id));
-				$path = 'assets/img/cards/'.$query->row()->card_img.'.png';
-				$idPath = array("$id" => "$path");
-				array_push($singleCards, $idPath);
+			$handQuery = CardManager::$DAIFUGO->get_where('daifugo_hand', array('user_id' => $playerIdArray[$i]['user_id'], 'used_flg' => false));
+			$singleHand = array();
+			foreach ($handQuery->result() as $handRow) {
+				$cardId = $handRow->card_id;
+				$cardName = CardManager::$DAIFUGO->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
+				$idPath = array($cardId => 'assets/img/cards/'.$cardName.'.png');
+				array_push($singleHand, $idPath);
 			}
-			array_push($handLists, $singleCards);
+			array_push($imgPathListOfHands, $singleHand);
 		}
-		return $handLists;
-	}
-
-	public function getUsedCard($gameNum) {
-		$query = CardController::$DAIFUGO->select('card_id')->get_where('daifugo_card', array('game_id' => $gameNum, 'used_id >' => 0, 'discard_flg' => false));
-		$idList = $query->result();
-		$singleCards = array();
-		foreach ($idList as $row) {
-			$id = $row->card_id;
-			$query = CardController::$TRUMP->get_where('card', array('card_id' => $id));
-			$path = 'assets/img/cards/'.$query->row()->card_img.'.png';
-			$idPath = array("$id" => "$path");
-			array_push($singleCards, $idPath);
-		}
-		return $singleCards;
+		return $imgPathListOfHands;
 	}
 }

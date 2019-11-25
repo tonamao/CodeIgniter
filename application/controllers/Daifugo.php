@@ -2,13 +2,17 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Daifugo extends CI_Controller {
-	public static $usedId = 1;
+	public static $GAME_NAME = 'DFG';
 
 	public function __construct(){
 		parent::__construct();
 		$this->load->helper('url_helper');
 		$this->load->helper('html');
-		$this->load->model('cardController');
+		$this->load->model('gameMatching');
+		$this->load->model('cardManager');
+		$this->load->model('ruleManager');
+		$this->load->model('gameManager');
+		$this->load->model('gameAreaManager');
 		$this->load->helper('form');
 		$this->load->library('form_validation');
 
@@ -22,13 +26,12 @@ class Daifugo extends CI_Controller {
 	 * Display first player hands.
 	 */
 	public function start() {
-		//TODO: insert daifugo_matching(insert num of player records)
-		// $this->cardController->insertDaifugoMatching();//TODO: insertDaifugoMatching()
+		$this->gameMatching->insertGameMatching(Daifugo::$GAME_NAME);
 
 		//get all player's hands
-		$playerNum = $this->cardController->getNumOfPlayer();
-		$data['all_hands'] = $this->cardController->getFirstHandsLists($playerNum);
-		$data['back'] = $this->cardController->getCardBack();
+		$playerNum = $this->gameMatching->getNumOfPlayer();
+		$data['all_hands'] = $this->cardManager->getFirstHandsLists($playerNum);
+		$data['back'] = $this->cardManager->getCardBack();
 
 		//TODO: check player's class & exchange cards -> update hand DB
 
@@ -39,30 +42,41 @@ class Daifugo extends CI_Controller {
 	 * 
 	 */
 	public function put() {
-		//TODO: check card according to rules
-		//true insert
-		//false view
+		//TODO: get user ID(from session?)
+		$userId = 'user0';
+		$selectingCards = $this->input->post('hidden-put');
+		$ruleList = $this->ruleManager->getRules();
+		$isMatchingRules = $this->ruleManager->checkRules($ruleList, $selectingCards);
 
-		//TODO: insert DB
-		//update hand
+		//if match rules, update DB.
+		if ($isMatchingRules) {
+			//TODO get pass flg
+			$passFlg = false;
+			//TODO get user ID (from session?)
+			$userId = 'user0';
 
-		//insert daifugo_game_manager
+			//update player's hands
+			$this->cardManager->useCard($userId, $selectingCards);
+			//update game status
+			$this->gameManager->insertGameStatus($userId, $passFlg);
+			//update user(playing game) status
+			$latestGameStatusId = $this->gameManager->getLatestGameStatus();
+			$this->gameManager->insertUserStatus($latestGameStatusId, $userId, $passFlg);
+			//update game area cards
+			$this->gameAreaManager->updateGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards);		
 
-		//insert user_status
+			//TODO: check whether user is end or not
 
-		//insert game_history
-
-		//TODO: check user end
-
-		//TODO: check game end 
-
-		//TODO: if game is end, update DB
-		//update matching
-
-		//insert game_result
-
+			//TODO: check game end
+				//TODO: if game is end, update DB
+				//update matching
+				//insert game_result
+		}
 		//TODO: view
-
+		$playerNum = $this->gameMatching->getNumOfPlayer();
+		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
+		$data['back'] = $this->cardManager->getCardBack();
+		$this->load->view('daifugo/daifugo', $data);
 	}
 
 	/**
@@ -79,28 +93,4 @@ class Daifugo extends CI_Controller {
 		//TODO: view
 	}
 
-
-////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * ユーザーが手札を場に出す
-	 */
-	public function oldput() {
-		$selectingCards = $this->input->post('hidden-put');
-		$gameNum = 1;
-		$playerNum = 4;
-		//出そうとしてるカードがruleに合ってるかチェックする
-		if ($this->cardController->checkCards($selectingCards)) {
-			//used_flgを有効"TRUE"にして更新する
-			$this->cardController->useCard($gameNum, $selectingCards, Daifugo::$usedId++);
-		}
-		$data['hands'] = $this->cardController->getHandLists($gameNum, $playerNum);
-		$data['back'] = $this->cardController->getCardBack();
-
-		//場のカードを表示
-		$data['used'] = $this->cardController->getUsedCard($gameNum);
-
-		//再表示
-		$this->load->view('daifugo/daifugo', $data);
-	}
 }
