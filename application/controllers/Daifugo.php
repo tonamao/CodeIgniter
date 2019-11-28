@@ -32,6 +32,7 @@ class Daifugo extends CI_Controller {
 		$playerNum = $this->gameMatching->getNumOfPlayer();
 		$data['all_hands'] = $this->cardManager->getFirstHandsLists($playerNum);
 		$data['back'] = $this->cardManager->getCardBack();
+		$data['game_area_cards'] = array();
 
 		//TODO: check player's class & exchange cards -> update hand DB
 
@@ -72,10 +73,19 @@ class Daifugo extends CI_Controller {
 				//update matching
 				//insert game_result
 		}
-		//TODO: view
 		$playerNum = $this->gameMatching->getNumOfPlayer();
 		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
 		$data['back'] = $this->cardManager->getCardBack();
+		$data['game_area_cards'] = $this->cardManager->getUsedCards();
+		$this->load->view('daifugo/daifugo', $data);
+	}
+	public function test() {
+		// print_r($this->cardManager->getUsedCards());
+		$playerNum = $this->gameMatching->getNumOfPlayer();
+		$userId = 'user0';
+		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
+		$data['back'] = $this->cardManager->getCardBack();
+		$data['game_area_cards'] = $this->cardManager->getUsedCards();
 		$this->load->view('daifugo/daifugo', $data);
 	}
 

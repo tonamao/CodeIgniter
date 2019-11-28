@@ -192,4 +192,45 @@ class CardManager extends CI_Model {
 		}
 		return $imgPathListOfHands;
 	}
+
+	/**
+	 * get used cards
+	 * @return used card array
+	 * 			[0] => Array (
+	 *				[0] => Array ( [37] => assets/img/cards/heart_11.png )
+	 * 				[1] => Array ( [26] => assets/img/cards/diamond_13.png )...
+	 * 				[n] => Array ( {card id} => {card img path})
+	 *			)...
+	 */
+	public function getUsedCards() {
+		$allUsedCards = array();
+		//TODO: get user id
+		$userId = 'user0';
+		$table = '';
+		$gameId = CardManager::$DAIFUGO->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		if (strpos($gameId, CardManager::$GAME_NAME) !== false) $table = 'daifugo_game_area_card';
+
+		//card idの連想配列を作る
+		$allCardIdsArray = array();
+		$singleCardIdArray = array();
+		CardManager::$DAIFUGO->select('card_ids');
+		$query = CardManager::$DAIFUGO->get_where($table, array('game_id' => $gameId, 'discard_flg' => false));
+		foreach ($query->result() as $row) {
+			$singleCardIdArray = explode(':', $row->card_ids);
+			array_push($allCardIdsArray, $singleCardIdArray);
+		}
+
+		//convert card id array to img path array
+		$allUsedCards = array();
+		foreach ($allCardIdsArray as $key => $cardIdArray) {
+			$singleIdArray = array();
+			foreach ($cardIdArray as $key => $cardId) {
+				$cardName = CardManager::$DAIFUGO->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
+				$idPath = array($cardId => 'assets/img/cards/'.$cardName.'.png');
+				array_push($singleIdArray, $idPath);
+			}
+			array_push($allUsedCards, $singleIdArray);
+		}
+		return $allUsedCards;
+	}
 }
