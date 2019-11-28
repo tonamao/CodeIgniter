@@ -79,6 +79,10 @@ class Daifugo extends CI_Controller {
 		$data['game_area_cards'] = $this->cardManager->getUsedCards();
 		$this->load->view('daifugo/daifugo', $data);
 	}
+
+	/**
+	 * test code
+	 */
 	public function test() {
 		// print_r($this->cardManager->getUsedCards());
 		$playerNum = $this->gameMatching->getNumOfPlayer();
@@ -87,6 +91,14 @@ class Daifugo extends CI_Controller {
 		$data['back'] = $this->cardManager->getCardBack();
 		$data['game_area_cards'] = $this->cardManager->getUsedCards();
 		$this->load->view('daifugo/daifugo', $data);
+	}
+
+	/**
+	 * test code for delete DB
+	 */
+	public function delete() {
+		$result = $this->cardManager->deleteAll();
+		echo $result == true ? 'Deletion completed!!' : 'Failed to delete DB...';
 	}
 
 	/**

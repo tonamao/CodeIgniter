@@ -233,4 +233,17 @@ class CardManager extends CI_Model {
 		}
 		return $allUsedCards;
 	}
+
+	/**
+	 * test code for delete
+	 */
+	public function deleteAll() {
+		CardManager::$DAIFUGO->empty_table('daifugo_game_area_card');
+		CardManager::$DAIFUGO->empty_table('daifugo_game_manager');
+		CardManager::$DAIFUGO->empty_table('daifugo_hand');
+		CardManager::$DAIFUGO->empty_table('daifugo_matching');
+		CardManager::$DAIFUGO->empty_table('daifugo_user_status');
+		CardManager::$DAIFUGO->empty_table('daifugo_result');
+		return true;
+	}
 }
