@@ -46,6 +46,7 @@ class Daifugo extends CI_Controller {
 		//TODO: get user ID(from session?)
 		$userId = 'user0';
 		$selectingCards = $this->input->post('hidden-put');
+
 		$ruleList = $this->ruleManager->getRules();
 		$isMatchingRules = $this->ruleManager->checkRules($ruleList, $selectingCards);
 
