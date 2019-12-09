@@ -63,7 +63,7 @@ class Daifugo extends CI_Controller {
 			$this->gameManager->insertGameStatus($userId, $passFlg);
 			//update user(playing game) status
 			$latestGameStatusId = $this->gameManager->getLatestGameStatus();
-			$this->gameManager->insertUserStatus($latestGameStatusId, $userId, $passFlg);
+			$this->gameManager->updateUserStatus($latestGameStatusId, $userId, $passFlg);
 			//update game area cards
 			$this->gameAreaManager->updateGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards);		
 
@@ -85,13 +85,8 @@ class Daifugo extends CI_Controller {
 	 * test code
 	 */
 	public function test() {
-		// print_r($this->cardManager->getUsedCards());
-		$playerNum = $this->gameMatching->getNumOfPlayer();
-		$userId = 'user0';
-		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
-		$data['back'] = $this->cardManager->getCardBack();
-		$data['game_area_cards'] = $this->cardManager->getUsedCards();
-		$this->load->view('daifugo/daifugo', $data);
+
+		print_r('Test Completion!');
 	}
 
 	/**
@@ -106,14 +101,26 @@ class Daifugo extends CI_Controller {
 	 * 
 	 */
 	public function pass() {
-		//TODO: insert DB
-		//insert game_manager
+		//TODO: get user ID(from session?)
+		$userId = 'user0';
+		$passFlg = true;
 
-		//insert user_status
+		//update game status
+		$this->gameManager->insertGameStatus($userId, $passFlg);
 
-		//insert game_history(null?)
+		//update user(playing game) status
+		$latestGameStatusId = $this->gameManager->getLatestGameStatus();
+		$this->gameManager->updateUserStatus($latestGameStatusId, $userId, $passFlg);
 
-		//TODO: view
+		//update game area cards
+		$this->gameAreaManager->updateGameAreaStatus($passFlg, $latestGameStatusId, null);
+
+		//view
+		$playerNum = $this->gameMatching->getNumOfPlayer();
+		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
+		$data['back'] = $this->cardManager->getCardBack();
+		$data['game_area_cards'] = $this->cardManager->getUsedCards();
+		$this->load->view('daifugo/daifugo', $data);
 	}
 
 }

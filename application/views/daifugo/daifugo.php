@@ -84,7 +84,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<?php echo form_open('daifugo/put'); ?>
             <input type="submit" name="put" id="put" class="btn-square-so-pop" value="出す">
             <input type="hidden" name="hidden-put" id="hidden-put">
+        </form>
+		<?php echo form_open('daifugo/pass'); ?>
             <input type="submit" name="pass" id="pass" class="btn-square-so-pop" value="パス">
+            <input type="hidden" name="hidden-pass" id="hidden-pass">
         </form>
             <!-- <form class="btn" action="#" method="post">
                 <a href="#" id="put" class="btn-square-so-pop">出す</a>
