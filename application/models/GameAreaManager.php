@@ -18,16 +18,19 @@ class GameAreaManager extends CI_Model {
 	 */
 	public function updateGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards) {
 		$table = '';
-		$gameId = GameAreaManager::$DAIFUGO->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->game_id;
-		$gameTurn = GameAreaManager::$DAIFUGO->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->game_turn;
+		$latestGameId = GameAreaManager::$DAIFUGO->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->game_id;
+		$latestGameTurn = GameAreaManager::$DAIFUGO->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->game_turn;
+		$latestPassNum = GameAreaManager::$DAIFUGO->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->pass_num;
 
-		if (strpos($gameId, GameAreaManager::$GAME_NAME) !== false) $table = 'daifugo_game_area_card';
+		if (strpos($latestGameId, GameAreaManager::$GAME_NAME) !== false) $table = 'daifugo_game_area_card';
 		if ($passFlg) {//case pass(update)
-			$updateData = array(
-				'discard_flg' => true
-			);
-			GameAreaManager::$DAIFUGO->where(array('game_id' => $gameId, 'game_turn' => $gameTurn));
-			GameAreaManager::$DAIFUGO->update($table, $updateData);
+			if ($latestPassNum == 0) {
+				$updateData = array(
+					'discard_flg' => true
+				);
+				GameAreaManager::$DAIFUGO->where(array('game_id' => $latestGameId, 'game_turn' => $latestGameTurn));
+				GameAreaManager::$DAIFUGO->update($table, $updateData);
+			}
 		} else {//case put(insert)
 			$selectingCardIds = '';
 			$idList = explode(',', $selectingCards);
@@ -39,8 +42,8 @@ class GameAreaManager extends CI_Model {
 
 			$insertData = array(
 				'game_status_id' => $latestGameStatusId,
-				'game_id' => $gameId,
-				'game_turn' => $gameTurn,
+				'game_id' => $latestGameId,
+				'game_turn' => $latestGameTurn,
 				'card_ids' => $selectingCardIds,
 				'discard_flg' => false
 			);

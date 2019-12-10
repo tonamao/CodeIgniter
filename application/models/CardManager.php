@@ -111,11 +111,45 @@ class CardManager extends CI_Model {
 			$playerId = $userIdArray[$playerIndex]['user_id'];
 			print_r($playerId, true);
 			foreach ($playerHandArray as $key => $id) {
+				$level = 0;
+				if ((1 <= $id) && ($id <= 13)) {
+					$cardNum = ($id - 13 * 0);
+					if ($cardNum <= 2) {
+						$level = ($cardNum + 11) * 4 - 3;
+					} else {
+						$level = ($cardNum -2) * 4 - 3;
+					}
+				} else if ((14 <= $id) && ($id <= 26)) {
+					$cardNum = ($id - 13 * 1);
+					if ($cardNum <= 2) {
+						$level = ($cardNum + 11) * 4 - 2;
+					} else {
+						$level = ($cardNum -2) * 4 - 2;
+					}
+				} else if ((27 <= $id) && ($id <= 39)) {
+					$cardNum = ($id - 13 * 2);
+					if ($cardNum <= 2) {
+						$level = ($cardNum + 11) * 4 - 1;
+					} else {
+						$level = ($cardNum -2) * 4 - 1;
+					}
+				} else if ((40 <= $id) && ($id <= 52)) {
+					$cardNum = ($id - 13 * 3);
+					if ($cardNum <= 2) {
+						$level = ($cardNum + 11) * 4 - 0;
+					} else {
+						$level = ($cardNum -2) * 4 - 0;
+					}
+				} else if (($id == 53) || ($id == 54)) {
+					$level = 53;
+				}
+
 				$cardData = array(
 					'game_id' => $gameId,
 					'user_id' => $playerId,
 					'card_id' => $id,
-					'used_flg' => false
+					'used_flg' => false,
+					'strength_level' => $level
 				);
 				CardManager::$DAIFUGO->insert('daifugo_hand', $cardData);
 			}
@@ -126,6 +160,7 @@ class CardManager extends CI_Model {
 		//TODO order card
 		$imgPathListOfHands = array();
 		for ($i = 0; $i < $playerNum; $i++) {
+			CardManager::$DAIFUGO->order_by('strength_level', 'ASC');
 			$handQuery = CardManager::$DAIFUGO->get_where(
 					'daifugo_hand', array('user_id' => $userIdArray[$i]['user_id']));
 			$singleHand = array();
@@ -180,6 +215,7 @@ class CardManager extends CI_Model {
 		$playerIdArray = CardManager::$DAIFUGO->get_where('daifugo_matching', array('game_id' => $gameId))->result_array();
 		$imgPathListOfHands = array();
 		for ($i = 0; $i < $playerNum; $i++) {
+			CardManager::$DAIFUGO->order_by('strength_level', 'ASC');
 			$handQuery = CardManager::$DAIFUGO->get_where('daifugo_hand', array('user_id' => $playerIdArray[$i]['user_id'], 'used_flg' => false));
 			$singleHand = array();
 			foreach ($handQuery->result() as $handRow) {

@@ -49,7 +49,7 @@
 
 	//TODO : 
 	function pass() {
-		console.log("PASS");
+		document.getElementById("hidden-pass").value = "pass";
 	}
 
 	/**
