@@ -215,6 +215,7 @@ class CardManager extends CI_Model {
 		$playerIdArray = CardManager::$DAIFUGO->get_where('daifugo_matching', array('game_id' => $gameId))->result_array();
 		$imgPathListOfHands = array();
 		for ($i = 0; $i < $playerNum; $i++) {
+			CardManager::$DAIFUGO->order_by('strength_level', 'ASC');
 			$handQuery = CardManager::$DAIFUGO->get_where('daifugo_hand', array('user_id' => $playerIdArray[$i]['user_id'], 'used_flg' => false));
 			$singleHand = array();
 			foreach ($handQuery->result() as $handRow) {
