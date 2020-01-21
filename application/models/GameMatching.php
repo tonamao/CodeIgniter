@@ -1,15 +1,8 @@
 <?php
 class GameMatching extends CI_Model {
-
-	public static $TRUMP;
-	public static $DAIFUGO;
-
 	public function __construct() {
 		$this->load->helper('url_helper');
-		
-		//TODO: database.phpを直す
-		GameMatching::$TRUMP = $this->load->database('default',true);
-		GameMatching::$DAIFUGO = $this->load->database('daifugo', true);
+		$this->load->database();
 	}
 
 	/**
@@ -36,7 +29,7 @@ class GameMatching extends CI_Model {
 				'game_order' => $order++,
 				'playing_flg' => true
 			);
-			GameMatching::$DAIFUGO->insert($table, $insertData);
+			$this->db->insert($table, $insertData);
 		}
 	}
 

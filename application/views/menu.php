@@ -12,7 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <body>
 	<div>メニュー</div>
 	<div>
-		<a href="<?php echo site_url('daifugo/daifugo') ;?>" class="btn-square">大富豪</a>
+		<a href="<?php echo site_url('daifugo/start') ;?>" class="btn-square">大富豪</a>
 	</div>
 </body>
 </html>

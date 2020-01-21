@@ -1,15 +1,9 @@
 <?php
 class RuleManager extends CI_Model {
 
-	public static $TRUMP;
-	public static $DAIFUGO;
-
 	public function __construct() {
 		$this->load->helper('url_helper');
-		
-		//TODO: database.phpを直す
-		RuleManager::$TRUMP = $this->load->database('default',true);
-		RuleManager::$DAIFUGO = $this->load->database('daifugo', true);
+		$this->load->database();
 	}
 
 	//TODO: create table for rules & imple rule list

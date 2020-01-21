@@ -1,17 +1,10 @@
 <?php
 class GameManager extends CI_Model {
-
-	public static $TRUMP;
-	public static $DAIFUGO;
-
 	public static $GAME_DAIFUGO = 'DFG';
 
 	public function __construct() {
 		$this->load->helper('url_helper');
-		
-		//TODO: database.phpを直す
-		GameManager::$TRUMP = $this->load->database('default',true);
-		GameManager::$DAIFUGO = $this->load->database('daifugo', true);
+        $this->load->database();
 	}
 
 	/**
@@ -19,7 +12,7 @@ class GameManager extends CI_Model {
 	 */
 	public function insertGameStatus($userId, $passFlg) {
 		$table = '';
-		$gameId = GameManager::$DAIFUGO->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		$gameId = $this->db->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
 		$gameTurn = 1;
 		$userTurn = $userId;
 		$userEndFlg = false;
@@ -28,16 +21,15 @@ class GameManager extends CI_Model {
 		$gameEndFlg = false;
 		$gameStatusId = $gameId.'-T'.$gameTurn.'-S0';
 
-		if (GameManager::$DAIFUGO->count_all('daifugo_game_manager') > 0) {
-			GameManager::$DAIFUGO->where(array('game_id' => $gameId));
-			$playerNum = GameManager::$DAIFUGO->count_all_results('daifugo_matching') > 0;
+		if ($this->db->count_all('daifugo_game_manager') > 0) {
+			$this->db->where(array('game_id' => $gameId));
+			$playerNum = $this->db->count_all_results('daifugo_matching') > 0;
 
-			$latestQuery = GameManager::$DAIFUGO->query('SELECT * FROM daifugo_game_manager WHERE insert_time = (SELECT MAX(insert_time) FROM daifugo_game_manager)');
-			// $test = GameManager::$DAIFUGO->select('game_status_id, game_turn, pass_num, user_turn, turn_owner, MAX(insert_time)');
+			$latestQuery = $this->db->query('SELECT * FROM daifugo_game_manager WHERE insert_time = (SELECT MAX(insert_time) FROM daifugo_game_manager)');
 
 			//user turn
 			$lastUserTurn = $latestQuery->row()->user_turn;
-			$lastUserOrder = GameManager::$DAIFUGO->get_where('daifugo_matching', array('game_id' => $gameId, 'user_id' => $lastUserTurn))->row()->game_order;
+			$lastUserOrder = $this->db->get_where('daifugo_matching', array('game_id' => $gameId, 'user_id' => $lastUserTurn))->row()->game_order;
 			$order = $lastUserOrder;
 			for ($i = 0; $i < ($playerNum - 1); $i++) {
 				if ($lastUserOrder < $playerNum) {
@@ -45,8 +37,8 @@ class GameManager extends CI_Model {
 				} else {
 					$order = 1;
 				}
-				$targetUserId = GameManager::$DAIFUGO->get_where('daifugo_matching', array('game_id' => $gameId, 'game_order' => $order))->row()->user_id;
-				$isUserEnd = GameManager::$DAIFUGO->get_where('daifugo_game_user_status', array('game_id' => $gameId, 'user_id' => $targetUserId))->row()->user_end_flg;
+				$targetUserId = $this->db->get_where('daifugo_matching', array('game_id' => $gameId, 'game_order' => $order))->row()->user_id;
+				$isUserEnd = $this->db->get_where('daifugo_game_user_status', array('game_id' => $gameId, 'user_id' => $targetUserId))->row()->user_end_flg;
 				if (!$isUserEnd) {
 					$userTurn = $targetUserId;
 					break;
@@ -61,8 +53,8 @@ class GameManager extends CI_Model {
 
 			//pass num & game turn
 			$lastGameTurn = $latestQuery->row()->game_turn;
-			GameManager::$DAIFUGO->where(array('game_turn' => $lastGameTurn, 'user_end_flg' => false));
-			$playingPlayerNum = GameManager::$DAIFUGO->count_all_results('daifugo_user_status');
+			$this->db->where(array('game_turn' => $lastGameTurn, 'user_end_flg' => false));
+			$playingPlayerNum = $this->db->count_all_results('daifugo_user_status');
 			$maxPassNum = ($playingPlayerNum - 1);
 			$lastPassNum = $latestQuery->row()->pass_num;
 			if ($passFlg) {
@@ -81,8 +73,8 @@ class GameManager extends CI_Model {
 			}
 
 			//game end flg
-		 	GameManager::$DAIFUGO->where(array('game_id' => $gameId, 'used_flg' => false));
-			if (GameManager::$DAIFUGO->count_all_results('daifugo_hand') == 0) {
+		 	$this->db->where(array('game_id' => $gameId, 'used_flg' => false));
+			if ($this->db->count_all_results('daifugo_hand') == 0) {
 				$gameEndFlg = true;
 			}
 
@@ -107,7 +99,7 @@ class GameManager extends CI_Model {
 			'game_end_flg' => $gameEndFlg,
 			'insert_time' => $now
 		);
-		GameManager::$DAIFUGO->insert($table, $insertData);
+		$this->db->insert($table, $insertData);
 	}
 
 	/**
@@ -115,10 +107,7 @@ class GameManager extends CI_Model {
 	 * @return gameStatusId
 	 */
 	public function getLatestGameStatus() {
-		$latestQuery = GameManager::$DAIFUGO->query('SELECT * FROM daifugo_game_manager WHERE insert_time = (SELECT MAX(insert_time) FROM daifugo_game_manager)');
-		// GameManager::$DAIFUGO->select_max('insert_time');
-		// GameManager::$DAIFUGO->select_max('game_status_id');
-		// $gameStatusId = GameManager::$DAIFUGO->get('daifugo_game_manager')->row()->game_status_id;
+		$latestQuery = $this->db->query('SELECT * FROM daifugo_game_manager WHERE insert_time = (SELECT MAX(insert_time) FROM daifugo_game_manager)');
 		$gameStatusId = $latestQuery->row()->game_status_id;
 		return $gameStatusId;
 	}
@@ -129,23 +118,23 @@ class GameManager extends CI_Model {
 	 */
 	public function updateUserStatus($latestGameStatusId, $userId, $passFlg) {
 		$table = '';
-		$gameId = GameManager::$DAIFUGO->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->game_id;
-		$gameTurn = GameManager::$DAIFUGO->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->game_turn;
+		$gameId = $this->db->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->game_id;
+		$gameTurn = $this->db->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->game_turn;
 
 		$userEndFlg;
-		GameManager::$DAIFUGO->where(array('user_id' => $userId, 'used_flg' => false));
-		if (GameManager::$DAIFUGO->count_all_results('daifugo_hand') > 0) {
+		$this->db->where(array('user_id' => $userId, 'used_flg' => false));
+		if ($this->db->count_all_results('daifugo_hand') > 0) {
 			$userEndFlg = false;
 		} else {
 			$userEndFlg = true;
 		}
 
 		if (strpos($gameId, GameManager::$GAME_DAIFUGO) !== false) $table = 'daifugo_user_status';
-		$userStatusRecordNum = GameManager::$DAIFUGO->count_all_results('daifugo_user_status');
+		$userStatusRecordNum = $this->db->count_all_results('daifugo_user_status');
 		if ($userStatusRecordNum == 0) {
-			$playerNum = GameManager::$DAIFUGO->count_all_results('daifugo_matching');
+			$playerNum = $this->db->count_all_results('daifugo_matching');
 			for ($i = 0; $i < $playerNum; $i++) {
-				$userIdToInsert = GameManager::$DAIFUGO->get_where('daifugo_matching',
+				$userIdToInsert = $this->db->get_where('daifugo_matching',
 					array('game_order' => ($i + 1)))->row()->user_id;
 				if ($userId == $userIdToInsert) {
 					$passFlgToInsert = $passFlg;
@@ -160,7 +149,7 @@ class GameManager extends CI_Model {
 					'pass_flg' => $passFlgToInsert,
 					'user_end_flg' => $userEndFlg
 				);
-				GameManager::$DAIFUGO->insert($table, $insertData);
+				$this->db->insert($table, $insertData);
 			}
 		} else {
 			$updateData = array(
@@ -171,8 +160,8 @@ class GameManager extends CI_Model {
 				'pass_flg' => $passFlg,
 				'user_end_flg' => $userEndFlg
 			);
-			GameAreaManager::$DAIFUGO->where(array('game_id' => $gameId, 'user_id' => $userId));
-			GameAreaManager::$DAIFUGO->update($table, $updateData);
+			$this->db->where(array('game_id' => $gameId, 'user_id' => $userId));
+			$this->db->update($table, $updateData);
 		}
 	}
 
@@ -181,6 +170,6 @@ class GameManager extends CI_Model {
 	 * @return user end flg
 	 */
 	public function checkUserEnd($latestGameStatusId) {
-		return GameManager::$DAIFUGO->get_where('daifugo_user_status', array('game_status_id' => $latestGameStatusId))->row()->user_end_flg;
+		return $this->db->get_where('daifugo_user_status', array('game_status_id' => $latestGameStatusId))->row()->user_end_flg;
 	}
 }
