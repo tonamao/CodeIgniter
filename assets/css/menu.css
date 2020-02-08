@@ -1,0 +1,40 @@
+html,body{
+	font-family: 'Quicksand', sans-serif;
+	text-align: center;
+	user-select: none;
+
+	background: #ffedff;
+	color: #754F44;
+	font-size: 20px;
+	font-weight: bold;
+
+	height: 100%;
+	margin:0;
+}
+
+.game {
+	display: inline-block;
+
+    padding: 0.5em 1em;
+    margin: 2em 0;
+    font-weight: bold;
+    color: #754F44;/*文字色*/
+    background: #FFF;
+    border: solid 3px #754F44;/*線*/
+    border-radius: 10px;/*角の丸み*/
+
+    width: 240px;
+}
+
+.game > div {
+	display: inline-block;
+	text-align-last: left;
+}
+
+.game > div > img {
+    vertical-align: middle;
+}
+
+.game > div > p {
+    margin: auto;
+}
