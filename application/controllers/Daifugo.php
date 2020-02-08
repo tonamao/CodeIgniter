@@ -18,6 +18,16 @@ class Daifugo extends CI_Controller {
 
 	}
 
+	public function rule() {
+		//TODO: ルール情報取得
+
+		//TODO: ルール情報表示
+
+		//TODO: マッチングを状態を登録する
+		
+		$this->load->view('daifugo/rule-selection');
+	}
+
 	/**
 	 * Insert daifugo_matching.
 	 * Hand out cards.

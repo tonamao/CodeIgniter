@@ -93,7 +93,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <a href="#" id="put" class="btn-square-so-pop">出す</a>
                 <a href="#" id="pass" class="btn-square-so-pop">パス</a>
             </form> -->
-	<div class="hand" id="user-hand">
+		<div class="hand" id="user-hand">
 			<?php $i = 0;
 			foreach ($all_hands[0] as $key => $idPath): ?>
 				<?php foreach ($idPath as $id => $path) :?>
