@@ -99,7 +99,7 @@ class CardManager extends CI_Model {
 		//insert DB
 		//TODO: user id(from session?)
 		$userId = 'user0';
-		$gameId = $this->db->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
 		$userIdArray = $this->db->get_where('daifugo_matching', array('game_id' => $gameId))->result_array();
 		foreach ($allPlayerCardsList as $playerIndex => $playerHandArray) {
 			$playerId = $userIdArray[$playerIndex]['user_id'];
@@ -183,7 +183,7 @@ class CardManager extends CI_Model {
 	 */
 	public function useCard($userId, $selectingCards) {
 		$table = '';
-		$gameId = $this->db->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
 		if (strpos($gameId, CardManager::$GAME_NAME) !== false) $table = 'daifugo_hand';
 		$idList = explode(',', $selectingCards);
 		foreach ($idList as $cardId) {
@@ -205,7 +205,7 @@ class CardManager extends CI_Model {
 	 *			)...
 	 */
 	public function getLatestHand($playerNum, $userId) {
-		$gameId = $this->db->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
 		$playerIdArray = $this->db->get_where('daifugo_matching', array('game_id' => $gameId))->result_array();
 		$imgPathListOfHands = array();
 		for ($i = 0; $i < $playerNum; $i++) {
@@ -237,7 +237,7 @@ class CardManager extends CI_Model {
 		//TODO: get user id
 		$userId = 'user0';
 		$table = '';
-		$gameId = $this->db->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
 		if (strpos($gameId, CardManager::$GAME_NAME) !== false) $table = 'daifugo_game_area_card';
 
 		//card idの連想配列を作る

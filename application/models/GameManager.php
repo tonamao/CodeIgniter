@@ -12,7 +12,7 @@ class GameManager extends CI_Model {
 	 */
 	public function insertGameStatus($userId, $passFlg) {
 		$table = '';
-		$gameId = $this->db->get_where('user_playing_game', array('user_id' => $userId))->row()->playing_game_id;
+		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
 		$gameTurn = 1;
 		$userTurn = $userId;
 		$userEndFlg = false;
