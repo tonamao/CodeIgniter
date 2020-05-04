@@ -19,7 +19,7 @@ class GameManager extends CI_Model {
 		$turnOwner = $userTurn;
 		$passNum = $passFlg == true ? 1 : 0;
 		$gameEndFlg = false;
-		$gameStatusId = $gameId.'-T'.$gameTurn.'-S0';
+		$gameStatusId = $gameId.'-T'.$gameTurn.'-O'.$userId;//DFG0-T{gameTurn}-O{userId}
 
 		if ($this->db->count_all('daifugo_game_manager') > 0) {
 			$this->db->where(array('game_id' => $gameId));
@@ -81,7 +81,7 @@ class GameManager extends CI_Model {
 			//game status id
 			$lastGameStatusId = $latestQuery->row()->game_status_id;
 			$statusCnt = substr($lastGameStatusId, (strpos($lastGameStatusId, 'S') + 1));
-			$gameStatusId = $gameId.'-T'.$gameTurn.'-S'.(++$statusCnt);
+			$gameStatusId = $gameId.'-T'.$gameTurn.'-O'.(++$statusCnt);
 		}
 
 		//insert time
@@ -171,5 +171,9 @@ class GameManager extends CI_Model {
 	 */
 	public function checkUserEnd($latestGameStatusId) {
 		return $this->db->get_where('daifugo_user_status', array('game_status_id' => $latestGameStatusId))->row()->user_end_flg;
+	}
+
+	public function getMasterTrumpCloverA() {
+		return $this->db->get_where('ms_trump_card', array('card_id' => 1))->row()->card_name;
 	}
 }

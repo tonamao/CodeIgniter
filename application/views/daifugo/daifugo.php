@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<title>大富豪</title>
 	<?php echo link_tag('/assets/css/daifugo.css'); ?>
 	<link href="https://fonts.googleapis.com/css?family=Quicksand&display=swap" rel="stylesheet">
-
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
 </head>
 <body>
 	<div class="cpu-area">
@@ -89,10 +89,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <input type="submit" name="pass" id="pass" class="btn-square-so-pop" value="パス">
             <input type="hidden" name="hidden-pass" id="hidden-pass">
         </form>
-            <!-- <form class="btn" action="#" method="post">
-                <a href="#" id="put" class="btn-square-so-pop">出す</a>
-                <a href="#" id="pass" class="btn-square-so-pop">パス</a>
-            </form> -->
+		<div id="test-btn" class="btn-square-so-pop">TEST-BUTTON</div>
 		<div class="hand" id="user-hand">
 			<?php $i = 0;
 			foreach ($all_hands[0] as $key => $idPath): ?>
@@ -124,10 +121,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			</div>
 		</div>
 	</div>
+	<div>Ajaxテスト</div>
+	<div id="ajax-test"></div>
+
 	<div>テスト</div>
+	<div id="test-div">
+		<div id="test-img"></div>
+	</div>
 	<div>
 		<div>CPU1 <?php echo count($all_hands[1])?>枚</div>
-			<?php foreach ($all_hands[1] as $key => $idPath): ?>
+			<?php foreach ($all_hands[1] as $key
+			=> $idPath): ?>
 				<?php foreach ($idPath as $id => $path): ?>
 					<?php echo $path; ?>
 				<?php endforeach; ?>
@@ -145,7 +149,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<?php endforeach; ?>
 			<?php endforeach; ?>
 	</div>
-	<div>テスト</div>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/daifugo.js"></script>
 </body>
 </html>

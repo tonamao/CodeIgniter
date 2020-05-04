@@ -276,4 +276,34 @@ class CardManager extends CI_Model {
 		$this->db->empty_table('daifugo_result');
 		return true;
 	}
+
+	/**
+	 * get selecting cardId & imgPath
+	 * @return selecting card array
+	 *				[0] => Array ( [37] => assets/img/cards/heart_11.png )
+	 * 				[1] => Array ( [26] => assets/img/cards/diamond_13.png )...
+	 * 				[n] => Array ( {card id} => {card img path})
+	 */
+	public function getSelectingCards($userId, $cardIdArrayStr) {
+
+		log_message('debug', '---getSelectingCards---');
+		$idList = array($cardIdArrayStr);
+		if(strpos($cardIdArrayStr, ',') !== false) {//$cardIdArrayStrに,が含まれている場合
+			log_message('debug', 'excluding "," target ->'.$cardIdArrayStr);
+			$idList = explode(',', $cardIdArrayStr);
+			log_message('debug', 'finish to explode');
+			log_message('debug', print_r($idList, true));
+		}
+		$selectinhCardImgPathArray = array();
+		foreach ($idList as $key => $cardId) {
+			log_message('debug', 'card id :'.$cardId);
+			$cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
+			log_message('debug', $cardName);
+			$idPath = array($cardId => 'assets/img/cards/'.$cardName.'.png');
+			array_push($selectinhCardImgPathArray, $idPath);
+		}
+
+		log_message('debug', '---getSelectingCards---');
+		return $selectinhCardImgPathArray;
+	}
 }
