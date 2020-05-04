@@ -1,0 +1,94 @@
+html,body{
+	font-family: 'Quicksand', sans-serif;
+	text-align: center;
+	user-select: none;
+
+	background: #ffedff;
+	color: #754F44;
+	font-size: 20px;
+	font-weight: bold;
+
+	height: 100%;
+	margin:0;
+}
+
+.cpu-area{
+	height: 20%;
+
+}
+
+.cpu {
+    width: 32%;
+    position: relative;
+    display: inline-block;
+}
+
+.game-area{
+	height: 35%;
+
+}
+
+.card{
+    position: relative;
+    display: inline-block;
+}
+
+.card.img{
+    position: absolute;
+}
+
+.user-area{
+	height: 45%;
+
+}
+
+form{
+    display: inline-block;    
+}
+
+.btn-square-so-pop {
+    position: relative;
+    display: inline-block;
+    padding: 0.25em 2em;
+    text-decoration: none;
+    color: #FFF;
+    background: #ff487e;/*色*/
+    border-radius: 4px;/*角の丸み*/
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0, 0, 0, 0.05);
+    font-weight: bold;
+    border: solid 2px #ff487e;/*線色*/
+}
+
+.btn-square-so-pop:active {
+    /*押したとき*/
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.30);
+}
+
+.hand {
+    height: 45%;
+}
+
+.user-area .hand > img{
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.status {
+	display: inline-block;
+
+    padding: 0.5em 1em;
+    margin: 2em 0;
+    font-weight: bold;
+    color: #754F44;/*文字色*/
+    background: #FFF;
+    border: solid 3px #754F44;/*線*/
+    border-radius: 10px;/*角の丸み*/
+
+    width: 240px;
+}
+
+.status > div {
+	display: inline-block;
+	text-align-last: left;
+	margin: 2px;
+}

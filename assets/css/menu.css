@@ -1,0 +1,13 @@
+html,body{
+	font-family: 'Quicksand', sans-serif;
+	text-align: center;
+	user-select: none;
+
+	background: #ffedff;
+	color: #754F44;
+	font-size: 20px;
+	font-weight: bold;
+
+	height: 100%;
+	margin:0;
+}
