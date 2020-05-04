@@ -172,7 +172,7 @@ class GameManager extends CI_Model {
 	public function checkUserEnd($latestGameStatusId) {
 		return $this->db->get_where('daifugo_user_status', array('game_status_id' => $latestGameStatusId))->row()->user_end_flg;
 	}
-
+  
 	public function getMasterTrumpCloverA() {
 		return $this->db->get_where('ms_trump_card', array('card_id' => 1))->row()->card_name;
 	}

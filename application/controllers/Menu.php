@@ -1,6 +1,5 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
 class Menu extends CI_Controller {
 	public function __construct(){
 		parent::__construct();
@@ -14,5 +13,4 @@ class Menu extends CI_Controller {
 		$data['gameInfo'] = $this->masterDataManager->getGameInfo();
 		$this->load->view('menu', $data);
 	}
-	
 }

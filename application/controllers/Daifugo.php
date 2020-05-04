@@ -97,6 +97,7 @@ class Daifugo extends CI_Controller {
 		//TODO: 更新前の状態と更新後の状態をdataで渡す
 
 		$this->load->view('daifugo/daifugo', $data);
+
 	}
 
 	/**
@@ -113,6 +114,7 @@ class Daifugo extends CI_Controller {
 		//update user(playing game) status
 		$latestGameStatusId = $this->gameManager->getLatestGameStatus();
 		$this->gameManager->updateUserStatus($latestGameStatusId, $userId, $passFlg);
+
 		//update game area cards
 		$this->gameAreaManager->updateGameAreaStatus($passFlg, $latestGameStatusId, null);
 
@@ -210,5 +212,4 @@ class Daifugo extends CI_Controller {
 		$result = $this->cardManager->deleteAll();
 		echo $result == true ? 'Deletion completed!!' : 'Failed to delete DB...';
 	}
-
 }
