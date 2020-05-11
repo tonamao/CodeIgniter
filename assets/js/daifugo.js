@@ -74,7 +74,7 @@
 				let areaCardElement = document.getElementById("ajax-test");
 
 				// --------getSelectingCards()で取得しようとした場合--------
-				let areaCards = Array.of(data.game_area_cards);
+				let areaCards = data.game_area_cards;
 				for (const cardIdPathArray of areaCards) {
 					let index = Object.keys(cardIdPathArray);
 					console.log(`array index: ${index}`);
