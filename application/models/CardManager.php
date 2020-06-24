@@ -10,9 +10,9 @@ class CardManager extends CI_Model {
 	/**
 	 * Get first player's hands.
 	 * Insert 'daifugo_hand' DB.
-	 * 
+	 *
 	 * @param int $playerNum
-	 * @return Array $allHandLists 
+	 * @return Array $allHandLists
 	 * 			[0] : user, [1~$playerNum]: cpu
 	 * 			[0] => Array (
 	 *				[0] => Array ( [37] => assets/img/cards/heart_11.png )
@@ -36,19 +36,22 @@ class CardManager extends CI_Model {
 			//一人分のカードを格納するリスト
 			$singleCards = array();
 			$cnt = 0;
-			while ($cnt < floor(54/$playerNum)) {
+			while ($cnt < floor(54 / $playerNum)) {
 				$randomIndex = rand(0, 53);
 
-				if (count($selectedCard) == 0) {//1回目
+				if (count($selectedCard) == 0) {
+					//1回目
 					//ランダムで選んだcard_id => $cardsInOrder[$randomIndex]
 					$id = $cardsInOrder[$randomIndex];
 					array_push($singleCards, $id);
 					array_push($selectedCard, $randomIndex);
 					$cnt++;
-				} else {//2回目以降
+				} else {
+					//2回目以降
 					//すでに選んだカードと被らないように判定する
 					$IsSelectedCard = in_array($randomIndex, $selectedCard);
-					if (!$IsSelectedCard) {//すでに選んだカードと被ってなかったら
+					if (!$IsSelectedCard) {
+						//すでに選んだカードと被ってなかったら
 						$id = $cardsInOrder[$randomIndex];
 						array_push($singleCards, $id);
 						array_push($selectedCard, $randomIndex);
@@ -60,7 +63,7 @@ class CardManager extends CI_Model {
 		};
 
 		//余りがある場合は余りをランダムにプレイヤーに振り分ける
-		if (54%$playerNum > 0) {
+		if (54 % $playerNum > 0) {
 			//余ったカードをListにつめる
 			$restCardList = array();
 			for ($i = 0; $i < 54; $i++) {
@@ -72,17 +75,19 @@ class CardManager extends CI_Model {
 
 			$selectedPlayers = array();
 			$cnt = 0;
-			$cardIndex = floor(54/$playerNum);
+			$cardIndex = floor(54 / $playerNum);
 			while ($cnt < count($restCardList)) {
 				$randomPlayerIndex = rand(0, ($playerNum - 1));
 
-				if (count($selectedPlayers) == 0) {//1回目
+				if (count($selectedPlayers) == 0) {
+					//1回目
 					$id = $restCardList[$cnt];
 					array_push($allPlayerCardsList[$randomPlayerIndex], $id);
 					array_push($selectedPlayers, $randomPlayerIndex);
 					$cnt++;
 					$cardIndex++;
-				} else {//2回目以降
+				} else {
+					//2回目以降
 					$IsfoundSameNo = in_array($randomPlayerIndex, $selectedPlayers);
 					if (!$IsfoundSameNo) {
 						$id = $restCardList[$cnt];
@@ -111,28 +116,28 @@ class CardManager extends CI_Model {
 					if ($cardNum <= 2) {
 						$level = ($cardNum + 11) * 4 - 3;
 					} else {
-						$level = ($cardNum -2) * 4 - 3;
+						$level = ($cardNum - 2) * 4 - 3;
 					}
 				} else if ((14 <= $id) && ($id <= 26)) {
 					$cardNum = ($id - 13 * 1);
 					if ($cardNum <= 2) {
 						$level = ($cardNum + 11) * 4 - 2;
 					} else {
-						$level = ($cardNum -2) * 4 - 2;
+						$level = ($cardNum - 2) * 4 - 2;
 					}
 				} else if ((27 <= $id) && ($id <= 39)) {
 					$cardNum = ($id - 13 * 2);
 					if ($cardNum <= 2) {
 						$level = ($cardNum + 11) * 4 - 1;
 					} else {
-						$level = ($cardNum -2) * 4 - 1;
+						$level = ($cardNum - 2) * 4 - 1;
 					}
 				} else if ((40 <= $id) && ($id <= 52)) {
 					$cardNum = ($id - 13 * 3);
 					if ($cardNum <= 2) {
 						$level = ($cardNum + 11) * 4 - 0;
 					} else {
-						$level = ($cardNum -2) * 4 - 0;
+						$level = ($cardNum - 2) * 4 - 0;
 					}
 				} else if (($id == 53) || ($id == 54)) {
 					$level = 53;
@@ -143,7 +148,7 @@ class CardManager extends CI_Model {
 					'user_id' => $playerId,
 					'card_id' => $id,
 					'used_flg' => false,
-					'strength_level' => $level
+					'strength_level' => $level,
 				);
 				$this->db->insert('daifugo_hand', $cardData);
 			}
@@ -156,19 +161,18 @@ class CardManager extends CI_Model {
 		for ($i = 0; $i < $playerNum; $i++) {
 			$this->db->order_by('strength_level', 'ASC');
 			$handQuery = $this->db->get_where(
-					'daifugo_hand', array('user_id' => $userIdArray[$i]['user_id']));
+				'daifugo_hand', array('user_id' => $userIdArray[$i]['user_id']));
 			$singleHand = array();
 			foreach ($handQuery->result() as $handRow) {
 				$cardId = $handRow->card_id;
 				$cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
-				$idPath = array($cardId => 'assets/img/cards/'.$cardName.'.png');
+				$idPath = array($cardId => 'assets/img/cards/' . $cardName . '.png');
 				array_push($singleHand, $idPath);
 			}
 			array_push($imgPathListOfHands, $singleHand);
 		}
 		return $imgPathListOfHands;
 	}
-
 
 	/**
 	 * Return img path of card's back.
@@ -184,19 +188,22 @@ class CardManager extends CI_Model {
 	public function useCard($userId, $selectingCards) {
 		$table = '';
 		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
-		if (strpos($gameId, CardManager::$GAME_NAME) !== false) $table = 'daifugo_hand';
+		if (strpos($gameId, CardManager::$GAME_NAME) !== false) {
+			$table = 'daifugo_hand';
+		}
+
 		$idList = explode(',', $selectingCards);
 		foreach ($idList as $cardId) {
-		 	$this->db->set('used_flg', true);
-		 	$this->db->where(array('game_id' => $gameId, 'card_id' => $cardId));
-		 	$this->db->update($table);
-		 }
+			$this->db->set('used_flg', true);
+			$this->db->where(array('game_id' => $gameId, 'card_id' => $cardId));
+			$this->db->update($table);
+		}
 	}
 
 	/**
 	 * Get all player's hands.
-	 * 
-	 * @return Array $allHandLists 
+	 *
+	 * @return Array $allHandLists
 	 * 			[0] : user, [1~$playerNum]: cpu
 	 * 			[0] => Array (
 	 *				[0] => Array ( [37] => assets/img/cards/heart_11.png )
@@ -215,7 +222,7 @@ class CardManager extends CI_Model {
 			foreach ($handQuery->result() as $handRow) {
 				$cardId = $handRow->card_id;
 				$cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
-				$idPath = array($cardId => 'assets/img/cards/'.$cardName.'.png');
+				$idPath = array($cardId => 'assets/img/cards/' . $cardName . '.png');
 				array_push($singleHand, $idPath);
 			}
 			array_push($imgPathListOfHands, $singleHand);
@@ -238,7 +245,9 @@ class CardManager extends CI_Model {
 		$userId = 'user0';
 		$table = '';
 		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
-		if (strpos($gameId, CardManager::$GAME_NAME) !== false) $table = 'daifugo_game_area_card';
+		if (strpos($gameId, CardManager::$GAME_NAME) !== false) {
+			$table = 'daifugo_game_area_card';
+		}
 
 		//card idの連想配列を作る
 		$allCardIdsArray = array();
@@ -256,7 +265,7 @@ class CardManager extends CI_Model {
 			$singleIdArray = array();
 			foreach ($cardIdArray as $key => $cardId) {
 				$cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
-				$idPath = array($cardId => 'assets/img/cards/'.$cardName.'.png');
+				$idPath = array($cardId => 'assets/img/cards/' . $cardName . '.png');
 				array_push($singleIdArray, $idPath);
 			}
 			array_push($allUsedCards, $singleIdArray);
@@ -278,6 +287,7 @@ class CardManager extends CI_Model {
 	}
 
 	/**
+	 * テストメソッド
 	 * get selecting cardId & imgPath
 	 * @return selecting card array
 	 *				[0] => Array ( [37] => assets/img/cards/heart_11.png )
@@ -288,22 +298,57 @@ class CardManager extends CI_Model {
 
 		log_message('debug', '---getSelectingCards---');
 		$idList = array($cardIdArrayStr);
-		if(strpos($cardIdArrayStr, ',') !== false) {//$cardIdArrayStrに,が含まれている場合
-			log_message('debug', 'excluding "," target ->'.$cardIdArrayStr);
+		if (strpos($cardIdArrayStr, ',') !== false) {
+			log_message('debug', 'excluding "," target ->' . $cardIdArrayStr);
 			$idList = explode(',', $cardIdArrayStr);
 			log_message('debug', 'finish to explode');
 			log_message('debug', print_r($idList, true));
 		}
 		$selectinhCardImgPathArray = array();
 		foreach ($idList as $key => $cardId) {
-			log_message('debug', 'card id :'.$cardId);
+			log_message('debug', 'card id :' . $cardId);
 			$cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
 			log_message('debug', $cardName);
-			$idPath = array($cardId => 'assets/img/cards/'.$cardName.'.png');
+			$idPath = array($cardId => 'assets/img/cards/' . $cardName . '.png');
 			array_push($selectinhCardImgPathArray, $idPath);
 		}
 
 		log_message('debug', '---getSelectingCards---');
 		return $selectinhCardImgPathArray;
 	}
+
+	/**
+	 * update selecting card's used_flg to true
+	 * @param  int $userId
+	 * @param  Array $selectingCardArray
+	 * @return Array $cardList
+	 */
+	public function updateSelectingCards($userId, $selectingCardArray) {
+		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
+		$table = '';
+		if (strpos($gameId, CardManager::$GAME_NAME) !== false) {
+			$table = 'daifugo_hand';
+		}
+
+		foreach ($selectingCardArray as $cardId) {
+			log_message('debug', 'cardId : ' . $cardId);
+			$this->db->set('used_flg', true);
+			$this->db->where(array('game_id' => $gameId, 'card_id' => $cardId));
+			$this->db->update($table);
+		}
+
+		// CardListを返す
+		require_once 'Entity/Card.php';
+		$cardList = array();
+		foreach ($selectingCardArray as $cardId) {
+			$cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
+			$idPath = 'assets/img/cards/' . $cardName . '.png';
+			$card = new Card();
+			$card->setId($cardId);
+			$card->setCardImg($idPath);
+			array_push($cardList, $card);
+		}
+		return $cardList;
+	}
+
 }
