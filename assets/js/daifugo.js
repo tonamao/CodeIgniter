@@ -69,13 +69,16 @@
 
 			success: function(data) {
 
+				// 手札から出したカードを消す
+				const handsElement = document.getElementById("user-hand");
+				deleteCarads(data.cards_used_in_current_turn, handsElement);
+
+
 				// 選択したカードをajax-testに表示する
 				// const areaCardElement = document.getElementById("ajax-test");
-				const areaCardElement = document.getElementsByClassName("game-area")[0];
-				console.log(`test: ${areaCardElement}`);
-
-				const gameAreaCardElements = generateGameAreaCardElement(data.cards_used_in_current_turn, areaCardElement);
-				gameAreaCardElements.forEach(element => areaCardElement.insertAdjacentHTML('beforeend', element));
+				const gameAreaCardElement = document.getElementsByClassName("game-area")[0];
+				const usedCardElements = generateGameAreaCardElement(data.cards_used_in_current_turn, gameAreaCardElement);
+				usedCardElements.forEach(element => gameAreaCardElement.insertAdjacentHTML('beforeend', element));
 
 				//TODO : CPU３体分の動き
 				//CPUが出すカードはサーバから受け取る
@@ -118,22 +121,36 @@
 		let selectCardIdStr = "";
 		for (let i = 0; i < targetCards.length; i++) {
 			if ((targetCards.length - 1) == i) {
-				selectCardIdStr += targetCards[i].id.slice(3);
+				selectCardIdStr += targetCards[i].id;
 			} else {
-				selectCardIdStr += targetCards[i].id.slice(3) + ",";
+				selectCardIdStr += targetCards[i].id + ",";
 			}
 		}
 		return selectCardIdStr;
 	}
 
 	/**
-	 * generate div element for game-area-card with putdata index, card id, img path.
+	 * delete putted cards' img element
+	 * @type {Array{Object}} cards arrat
 	 * @type {Array{String}} divElement array
 	 */
-	function generateGameAreaCardElement(areaCards, targetElement) {
-		console.log(`---generateGameAreaCardElement(areaCards)---`)
+	function deleteCarads(cards, targetElement) {
+		const handsElements = Array.from(targetElement.children);
+		let deleteCardIds = [];
+		cards.forEach(c => {
+			handsElements.filter(e => c.id == e.id).forEach(deleteE =>
+				deleteE.parentNode.removeChild(deleteE));
+		});
+	}
 
-		const cardIndexes = Object.keys(areaCards);
+	/**
+	 * generate div element for game-area-card with putdata index, card id, img path.
+	 * @type {Array{Object}} cards arrat
+	 * @type {Array{String}} divElement array
+	 * @return gameAreaCardElement array
+	 */
+	function generateGameAreaCardElement(cards, targetElement) {
+		const cardIndexes = Object.keys(cards);
 		const leftValues = [44, 50, 48, 43];
 		const topValues = ['auto', 24, 36, 30];
 		const location = getLocation(targetElement);
@@ -141,7 +158,7 @@
 
 		let cnt = 0;
 		const gameAreaCardElements = [];
-		for (const card of areaCards) {
+		for (const card of cards) {
 			const cardIndex = parseInt(cardIndexes[cnt++]);
 			const gameAreaElement = `<div class="card img" id="location-${location}" ` +
 				`style="z-index:${zIndex++}; left:${leftValues[location-1]+cardIndex}%; top:${topValues[location-1]}%;">` +
