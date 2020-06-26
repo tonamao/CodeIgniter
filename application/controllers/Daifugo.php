@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Daifugo extends CI_Controller {
 	public static $GAME_NAME = 'DFG';
 
-	public function __construct(){
+	public function __construct() {
 		parent::__construct();
 		$this->output->enable_profiler(false);
 		$this->load->helper('url_helper');
@@ -27,7 +27,6 @@ class Daifugo extends CI_Controller {
 
 		//TODO: ルール情報表示
 
-		
 		$this->load->view('daifugo/rule-selection');
 	}
 
@@ -51,7 +50,7 @@ class Daifugo extends CI_Controller {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	//TODO: putとpassを同じpathにする（playing）
 	public function put() {
@@ -60,7 +59,7 @@ class Daifugo extends CI_Controller {
 		//TODO get pass flg
 		$passFlg = false;
 
-		if(!$passFlg){
+		if (!$passFlg) {
 			$selectingCards = $this->input->post('hidden-put');
 			//update player's hands
 			$this->cardManager->useCard($userId, $selectingCards);
@@ -78,19 +77,18 @@ class Daifugo extends CI_Controller {
 		$latestGameStatusId = $this->gameManager->getLatestGameStatus();
 		$this->gameManager->updateUserStatus($latestGameStatusId, $userId, $passFlg);
 		//update game area cards
-		$this->gameAreaManager->updateGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards);		
+		$this->gameAreaManager->updateGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards);
 
 		//TODO: check whether user is end or not
 
 		//TODO: check game end
-			//TODO: if game is end, update DB
-			//update matching
-			//insert game_result
+		//TODO: if game is end, update DB
+		//update matching
+		//insert game_result
 		$playerNum = $this->gameMatching->getNumOfPlayer();
 		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
 		$data['back'] = $this->cardManager->getCardBack();
 		$data['game_area_cards'] = $this->cardManager->getUsedCards();
-
 
 		//TODO:CPUが出すカードをランダムで生成
 		//TODO: 出すカードが決まったらDB更新
@@ -101,7 +99,7 @@ class Daifugo extends CI_Controller {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public function pass() {
 		//TODO: get user ID(from session?)
@@ -130,32 +128,36 @@ class Daifugo extends CI_Controller {
 	 * test code for ajax + update db
 	 */
 	public function test() {
-		log_message('debug', '---Daifugo Controller---');
-		//TODO: get user ID(from session?)
+		log_message('debug', '---Daifugo Controller Start---');
 		$userId = $this->input->post('userId');
 		//TODO get pass flg
 		$passFlg = false;
 
 		$selectingCards = null;
-		if(!$passFlg){
+		if (!$passFlg) {
 			$selectingCards = $this->input->post('cards');
-			log_message('debug', '$selectingCards is '.$selectingCards);
+			log_message('debug', '$selectingCards is ' . $selectingCards);
 			//update player's hands
 			$this->cardManager->useCard($userId, $selectingCards);
+
+			// check rules
+			$ruleList = $this->ruleManager->getRules();
+			$isMatchingRules = $this->ruleManager->checkRules($ruleList, $selectingCards);
+			//if match rules, update DB.
+			if ($isMatchingRules) {
+				//update player's hands
+				$this->cardManager->useCard($userId, $selectingCards);
+			}
 		}
 
-		$ruleList = $this->ruleManager->getRules();
-		$isMatchingRules = $this->ruleManager->checkRules($ruleList, $selectingCards);
-		//if match rules, update DB.
-		if ($isMatchingRules) {
-		}
-
-		log_message('debug', 'update database...');
 		//update game status
+		log_message('debug', 'insertGameStatus...' . $userId);
 		$this->gameManager->insertGameStatus($userId, $passFlg);
 		//update user(playing game) status
+		log_message('debug', 'getLatestGameStatus...');
 		$latestGameStatusId = $this->gameManager->getLatestGameStatus();
 		$this->gameManager->updateUserStatus($latestGameStatusId, $userId, $passFlg);
+		log_message('debug', 'updateUserStatus');
 		//update game area cards
 		$this->gameAreaManager->updateGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards);
 
@@ -163,40 +165,21 @@ class Daifugo extends CI_Controller {
 
 		//TODO: check game end
 		//TODO: if game is end, update DB
-		//update matching
-		//insert game_result
+		//TODO : update matching
+		//TODO : insert game_result
+
+		// create response
+		log_message('debug', 'create response');
 		$playerNum = $this->gameMatching->getNumOfPlayer();
 		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
 		$data['back'] = $this->cardManager->getCardBack();
 		$data['game_area_cards'] = $this->cardManager->getUsedCards();
-		// $data['game_area_cards'] = $this->cardManager->getSelectingCards($userId, $selectingCards);
-		log_message('debug', 'getUsedCard is '.print_r($data['game_area_cards'], true));
+		$data['cards_used_in_current_turn'] = $this->cardManager->updateSelectingCards($userId, explode(',', $selectingCards));
+		log_message('debug', 'Response [CardList] is ' . print_r($data['cards_used_in_current_turn'], true));
 
 		//TODO:CPUが出すカードをランダムで生成
 		//TODO: 出すカードが決まったらDB更新
 		//TODO: 更新後のarea-cardと次のターンのturnIdを詰める
-
-		//$dataをJSONにして返す
-		log_message('debug', '---Daifugo Controller---');
-		$this->output
-			->set_content_type('application/json')
-			->set_output(json_encode($data));
-		// $this->load->view('daifugo/daifugo', $data);
-	}
-
-	/**
-	 * 選択したカードだけを返却する用のテストコード
-	 */
-	public function testNowSelecting() {
-		//TODO: get user ID(from session?)
-		log_message('debug', '---Daifugo Controller---');
-		$userId = $this->input->post('userId');
-
-		$selectingCards = $this->input->post('cards');
-		log_message('debug', 'posted card : '.$selectingCards);
-
-		$data['game_area_cards'] = $this->cardManager->getSelectingCards($userId, $selectingCards);
-		log_message('debug', 'getSelectingCards is '.print_r($data['game_area_cards'], true));
 
 		//$dataをJSONにして返す
 		log_message('debug', '---Daifugo Controller---');

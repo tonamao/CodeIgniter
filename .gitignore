@@ -21,6 +21,9 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /nbproject/
 .idea/*
 
+## IntelliJ or PhpStorm
+ci.iml
+
 ## Sublime Text cache files
 *.tmlanguage.cache
 *.tmPreferences.cache
