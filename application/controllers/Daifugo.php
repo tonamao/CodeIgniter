@@ -131,13 +131,12 @@ class Daifugo extends CI_Controller {
 		log_message('debug', '---Daifugo Controller Start---');
 		$userId = $this->input->post('userId');
 		//TODO get pass flg
-		$passFlg = false;
-
-		$selectingCards = null;
-		if (!$passFlg) {
-			$selectingCards = $this->input->post('cards');
-			log_message('debug', '$selectingCards is ' . $selectingCards);
-			//update player's hands
+		$passFlg = boolval($this->input->post('passFlg'));
+		log_message('debug', '$passFlg: ' . $passFlg);
+		$selectingCards = $this->input->post('cards');
+		log_message('debug', '$selectingCards is ' . print_r($selectingCards, true));
+		if (!boolval($passFlg)) {
+			// FIXME: update hands after check rules
 			$this->cardManager->useCard($userId, $selectingCards);
 
 			// check rules
@@ -174,7 +173,7 @@ class Daifugo extends CI_Controller {
 		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
 		$data['back'] = $this->cardManager->getCardBack();
 		$data['game_area_cards'] = $this->cardManager->getUsedCards();
-		$data['cards_used_in_current_turn'] = $this->cardManager->updateSelectingCards($userId, explode(',', $selectingCards));
+		$data['cards_used_in_current_turn'] = $this->cardManager->updateSelectingCards($userId, $selectingCards);
 		log_message('debug', 'Response [CardList] is ' . print_r($data['cards_used_in_current_turn'], true));
 
 		//TODO:CPUが出すカードをランダムで生成

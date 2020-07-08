@@ -17,30 +17,34 @@ class GameAreaManager extends CI_Model {
 		$latestGameTurn = $this->db->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->game_turn;
 		$latestPassNum = $this->db->get_where('daifugo_game_manager', array('game_status_id' => $latestGameStatusId))->row()->pass_num;
 
-		if (strpos($latestGameId, GameAreaManager::$GAME_NAME) !== false) $table = 'daifugo_game_area_card';
-		if ($passFlg) {//case pass(update)
+		if (strpos($latestGameId, GameAreaManager::$GAME_NAME) !== false) {
+			$table = 'daifugo_game_area_card';
+		}
+
+		if ($passFlg) {
+			//case pass(update)
 			if ($latestPassNum == 0) {
 				$updateData = array(
-					'discard_flg' => true
+					'discard_flg' => true,
 				);
 				$this->db->where(array('game_id' => $latestGameId, 'game_turn' => $latestGameTurn));
 				$this->db->update($table, $updateData);
 			}
-		} else {//case put(insert)
+		} else {
+			//case put(insert)
 			$selectingCardIds = '';
-			$idList = explode(',', $selectingCards);
-			foreach ($idList as $cardId) {
+			foreach ($selectingCards as $cardId) {
 				$selectingCardIds .= $cardId;
 				$selectingCardIds .= ':';
-			 }
-			 $selectingCardIds = substr($selectingCardIds, 0, -1);
+			}
+			$selectingCardIds = substr($selectingCardIds, 0, -1);
 
 			$insertData = array(
 				'game_status_id' => $latestGameStatusId,
 				'game_id' => $latestGameId,
 				'game_turn' => $latestGameTurn,
 				'card_ids' => $selectingCardIds,
-				'discard_flg' => false
+				'discard_flg' => false,
 			);
 			$this->db->insert($table, $insertData);
 		}

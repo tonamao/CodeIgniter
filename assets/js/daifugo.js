@@ -49,16 +49,25 @@
 	//TODO : 
 	function pass() {
 		document.getElementById("hidden-pass").value = "pass";
+		const postData = {
+			userI: getUserId(),
+			passFlg: true
+		}
 	}
 
 	//TODO :
 	function test() {
 		let postData = {
 			userId: getUserId(),
+			passFlg: false,
 			cards: getSelectedCards()
 		}
 
 		alert(`cards: ${postData.cards}`);
+
+		if (!postData.cards) {
+			return;
+		}
 
 		//Ajax
 		$.ajax({
@@ -69,15 +78,20 @@
 
 			success: function(data) {
 
+				const selectedCards = data.cards_used_in_current_turn;
+				if (!selectedCards) {
+					return;
+				}
+
 				// 手札から出したカードを消す
 				const handsElement = document.getElementById("user-hand");
-				deleteCarads(data.cards_used_in_current_turn, handsElement);
+				deleteCarads(selectedCards, handsElement);
 
 
 				// 選択したカードをajax-testに表示する
 				// const areaCardElement = document.getElementById("ajax-test");
 				const gameAreaCardElement = document.getElementsByClassName("game-area")[0];
-				const usedCardElements = generateGameAreaCardElement(data.cards_used_in_current_turn, gameAreaCardElement);
+				const usedCardElements = generateGameAreaCardElement(selectedCards, gameAreaCardElement);
 				usedCardElements.forEach(element => gameAreaCardElement.insertAdjacentHTML('beforeend', element));
 
 				//TODO : CPU３体分の動き
@@ -108,25 +122,8 @@
 	 * @type {String} selected cards
 	 */
 	function getSelectedCards() {
-		let targetCards = [];
-		for (let i = 0; i < userHandNum; i++) {
-			let target = document.getElementsByClassName("img" + i)[0];
-			if (target != null) {
-				let tgtStyle = target.style.fontWeight;
-				if (tgtStyle == "bold") {
-					targetCards.push(target);
-				}
-			}
-		}
-		let selectCardIdStr = "";
-		for (let i = 0; i < targetCards.length; i++) {
-			if ((targetCards.length - 1) == i) {
-				selectCardIdStr += targetCards[i].id;
-			} else {
-				selectCardIdStr += targetCards[i].id + ",";
-			}
-		}
-		return selectCardIdStr;
+		const tartgetArray = Array.from(document.getElementById('user-hand').children);
+		return tartgetArray.filter(t => t.style.fontWeight == "bold").map(t => t.id);
 	}
 
 	/**
