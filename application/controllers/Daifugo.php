@@ -50,41 +50,85 @@ class Daifugo extends CI_Controller {
 	}
 
 	/**
-	 *
+	 * put process
+	 * update player hands & game status, return ajax response
 	 */
-	//TODO: putとpassを同じpathにする（playing）
 	public function put() {
-		//TODO: get user ID(from session?)
-		$userId = 'user0';
-		//TODO get pass flg
+		log_message('debug', '---Daifugo.put() Start---');
+		// get ajax data
+		$userId = $this->input->post('userId');
+		$selectingCards = $this->input->post('cards');
+		log_message('debug', '$userId: ' . $userId);
+		log_message('debug', '$selectingCards is ' . print_r($selectingCards, true));
 		$passFlg = false;
 
-		if (!$passFlg) {
-			$selectingCards = $this->input->post('hidden-put');
+		// check rule, update user hand
+		// $isMatchingRules = $this->ruleManager->checkRules($this->ruleManager->getRules(), $selectingCards);
+		$isMatchingRules = true;
+		//if match rules, update DB.
+		if ($isMatchingRules) {
 			//update player's hands
 			$this->cardManager->useCard($userId, $selectingCards);
 		}
-
-		$ruleList = $this->ruleManager->getRules();
-		$isMatchingRules = $this->ruleManager->checkRules($ruleList, $selectingCards);
-		//if match rules, update DB.
-		if ($isMatchingRules) {
-		}
-
 		//update game status
+		log_message('debug', 'insert GameStatus :' . $userId);
 		$this->gameManager->insertGameStatus($userId, $passFlg);
 		//update user(playing game) status
+		log_message('debug', 'get LatestGameStatus');
 		$latestGameStatusId = $this->gameManager->getLatestGameStatus();
 		$this->gameManager->updateUserStatus($latestGameStatusId, $userId, $passFlg);
+		log_message('debug', 'updateUserStatus');
 		//update game area cards
 		$this->gameAreaManager->updateGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards);
 
 		//TODO: check whether user is end or not
-
 		//TODO: check game end
 		//TODO: if game is end, update DB
-		//update matching
-		//insert game_result
+		//TODO : update matching
+		//TODO : insert game_result
+
+		// create response
+		log_message('debug', 'create response');
+		$playerNum = $this->gameMatching->getNumOfPlayer();
+		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
+		$data['back'] = $this->cardManager->getCardBack();
+		$data['game_area_cards'] = $this->cardManager->getUsedCards();
+		$data['cards_used_in_current_turn'] = $this->cardManager->updateSelectingCards($userId, $selectingCards);
+		log_message('debug', 'Response [CardList] is ' . print_r($data['cards_used_in_current_turn'], true));
+
+		//TODO:CPUが出すカードをランダムで生成
+		//TODO: 出すカードが決まったらDB更新
+		//TODO: 更新後のarea-cardと次のターンのturnIdを詰める
+
+		//$dataをJSONにして返す
+		log_message('debug', '---Daifugo.put() End---');
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode($data));
+	}
+
+	/**
+	 * pass process
+	 * update only game status, return ajax data
+	 */
+	public function pass() {
+		log_message('debug', '---Daifugo.pass() Start---');
+		// get ajax data
+		$userId = $this->input->post('userId');
+		log_message('debug', '$userId: ' . $userId);
+		$passFlg = true;
+
+		//update game status
+		log_message('debug', 'insert GameStatus :' . $userId);
+		$this->gameManager->insertGameStatus($userId, $passFlg);
+		//update user(playing game) status
+		log_message('debug', 'get LatestGameStatus');
+		$latestGameStatusId = $this->gameManager->getLatestGameStatus();
+		$this->gameManager->updateUserStatus($latestGameStatusId, $userId, $passFlg);
+		log_message('debug', 'updateUserStatus');
+
+		// create response
+		log_message('debug', 'create response');
 		$playerNum = $this->gameMatching->getNumOfPlayer();
 		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
 		$data['back'] = $this->cardManager->getCardBack();
@@ -92,37 +136,18 @@ class Daifugo extends CI_Controller {
 
 		//TODO:CPUが出すカードをランダムで生成
 		//TODO: 出すカードが決まったらDB更新
-		//TODO: 更新前の状態と更新後の状態をdataで渡す
+		//TODO: 更新後のarea-cardと次のターンのturnIdを詰める
 
-		$this->load->view('daifugo/daifugo', $data);
-
+		//$dataをJSONにして返す
+		log_message('debug', '---Daifugo.pass() End---');
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode($data));
 	}
 
-	/**
-	 *
-	 */
-	public function pass() {
-		//TODO: get user ID(from session?)
-		$userId = 'user0';
-		//TODO get pass flg
-		$passFlg = true;
-
-		//update game status
-		$this->gameManager->insertGameStatus($userId, $passFlg);
-		//update user(playing game) status
-		$latestGameStatusId = $this->gameManager->getLatestGameStatus();
-		$this->gameManager->updateUserStatus($latestGameStatusId, $userId, $passFlg);
-
-		//update game area cards
-		$this->gameAreaManager->updateGameAreaStatus($passFlg, $latestGameStatusId, null);
-
-		//view
-		$playerNum = $this->gameMatching->getNumOfPlayer();
-		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
-		$data['back'] = $this->cardManager->getCardBack();
-		$data['game_area_cards'] = $this->cardManager->getUsedCards();
-		$this->load->view('daifugo/daifugo', $data);
-	}
+	////////////////////////////////////////
+	///  test code                       ///
+	////////////////////////////////////////
 
 	/**
 	 * test code for ajax + update db

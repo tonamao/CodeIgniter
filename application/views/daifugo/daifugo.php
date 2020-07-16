@@ -86,14 +86,8 @@ echo img($card_prop);?>
 	    </div>
 	</div>
 	<div class="user-area">
-		<?php echo form_open('daifugo/put'); ?>
-            <input type="submit" name="put" id="put" class="btn-square-so-pop" value="出す">
-            <input type="hidden" name="hidden-put" id="hidden-put">
-        </form>
-		<?php echo form_open('daifugo/pass'); ?>
-            <input type="submit" name="pass" id="pass" class="btn-square-so-pop" value="パス">
-            <input type="hidden" name="hidden-pass" id="hidden-pass">
-        </form>
+		<div id="put" class="btn-square-so-pop">出す</div>
+		<div id="pass" class="btn-square-so-pop">パス</div>
 		<div id="test-btn" class="btn-square-so-pop">TEST-BUTTON</div>
 		<div class="hand" id="user-hand">
 			<?php $i = 0;foreach ($all_hands[0] as $key => $idPath): ?>

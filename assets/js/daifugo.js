@@ -36,26 +36,83 @@
 	 * formのhidden-putに選択したカードのidを渡す(id, id, ...)
 	 */
 	function put() {
-		let targetCards = getSelectedCards();
-
 		let postData = {
 			userId: getUserId(),
 			cards: getSelectedCards()
 		}
-		alert('data: ' + targetCards);
-		document.getElementById("hidden-put").value = targetCards;
+
+		alert(`cards: ${postData.cards}`);
+
+		if (!postData.cards) {
+			return;
+		}
+
+		//Ajax
+		$.ajax({
+			type: 'POST', // HTTPメソッド（CodeIgniterだとgetは捨てられる）
+			url: 'http://localhost/daifugo/test', //リクエストの送り先URL（適宜変える）
+			data: postData, //サーバに送るデータ。JSのオブジェクトで書ける
+			dataType: 'json', //サーバからくるデータの形式を指定
+
+			success: function(data) {
+
+				const selectedCards = data.cards_used_in_current_turn;
+				if (!selectedCards) {
+					return;
+				}
+
+				// 手札から出したカードを消す
+				const handsElement = document.getElementById("user-hand");
+				deleteCarads(selectedCards, handsElement);
+
+				// 選択したカードをajax-testに表示する
+				const gameAreaCardElement = document.getElementsByClassName("game-area")[0];
+				const usedCardElements = generateGameAreaCardElement(selectedCards, gameAreaCardElement);
+				usedCardElements.forEach(element => gameAreaCardElement.insertAdjacentHTML('beforeend', element));
+
+				//TODO : CPU３体分の動き
+				//CPUが出すカードはサーバから受け取る
+				//turnId 的なのもサーバから受け取る
+
+				//TODO : 最後にターンIDで画面遷移？
+				//window.location.href = 'http://localhost/test/client/btns';
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				console.log(XMLHttpRequest); // XMLHttpRequestオブジェクト
+				console.log(textStatus); // status は、リクエスト結果を表す文字列
+				console.log(errorThrown); // errorThrown は、例外オブジェクト
+			}
+		});
 	}
 
 	//TODO : 
 	function pass() {
-		document.getElementById("hidden-pass").value = "pass";
 		const postData = {
-			userI: getUserId(),
-			passFlg: true
+			userId: getUserId(),
+			cards: null
 		}
+
+		//Ajax
+		$.ajax({
+			type: 'POST', // HTTPメソッド（CodeIgniterだとgetは捨てられる）
+			url: 'http://localhost/daifugo/pass', //リクエストの送り先URL（適宜変える）
+			data: postData, //サーバに送るデータ。JSのオブジェクトで書ける
+			dataType: 'json', //サーバからくるデータの形式を指定
+
+			success: function(data) {
+				// passの場合は何もしない
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown) {
+				console.log(XMLHttpRequest); // XMLHttpRequestオブジェクト
+				console.log(textStatus); // status は、リクエスト結果を表す文字列
+				console.log(errorThrown); // errorThrown は、例外オブジェクト
+			}
+		});
 	}
 
-	//TODO :
+	/**
+	 * put用ajaxテストコード
+	 */
 	function test() {
 		let postData = {
 			userId: getUserId(),
@@ -87,9 +144,7 @@
 				const handsElement = document.getElementById("user-hand");
 				deleteCarads(selectedCards, handsElement);
 
-
 				// 選択したカードをajax-testに表示する
-				// const areaCardElement = document.getElementById("ajax-test");
 				const gameAreaCardElement = document.getElementsByClassName("game-area")[0];
 				const usedCardElements = generateGameAreaCardElement(selectedCards, gameAreaCardElement);
 				usedCardElements.forEach(element => gameAreaCardElement.insertAdjacentHTML('beforeend', element));
@@ -111,7 +166,7 @@
 
 	/**
 	 * TODO: ユーザごとにIDを返す
-	 * @type {String} userId
+	 * @type String userId
 	 */
 	function getUserId() {
 		return 'user0';
@@ -119,7 +174,7 @@
 
 	/**
 	 * 選択しているカードを返す
-	 * @type {String} selected cards
+	 * @type String selected cards
 	 */
 	function getSelectedCards() {
 		const tartgetArray = Array.from(document.getElementById('user-hand').children);
@@ -128,8 +183,8 @@
 
 	/**
 	 * delete putted cards' img element
-	 * @type {Array{Object}} cards arrat
-	 * @type {Array{String}} divElement array
+	 * @type Array{Object} cards arrat
+	 * @type Array{String} divElement array
 	 */
 	function deleteCarads(cards, targetElement) {
 		const handsElements = Array.from(targetElement.children);
@@ -142,8 +197,8 @@
 
 	/**
 	 * generate div element for game-area-card with putdata index, card id, img path.
-	 * @type {Array{Object}} cards arrat
-	 * @type {Array{String}} divElement array
+	 * @type Array{Object} cards arrat
+	 * @type Array{String} divElement array
 	 * @return gameAreaCardElement array
 	 */
 	function generateGameAreaCardElement(cards, targetElement) {
@@ -172,8 +227,8 @@
 
 	/**
 	 * get z-index value from current game-area card z-index
-	 * @param  {HTMLDivElement} targetElement element of target area 
-	 * @return {int} location
+	 * @param  HTMLDivElement targetElement element of target area 
+	 * @return int location
 	 */
 	function getZIndex(targetElement) {
 		const lastElement = targetElement.lastElementChild;
@@ -189,8 +244,8 @@
 
 	/**
 	 * get card location from current game-area card location
-	 * @param  {HTMLDivElement} targetElement element of target area 
-	 * @return {int} location
+	 * @param  HTMLDivElement targetElement element of target area 
+	 * @return int location
 	 */
 	function getLocation(targetElement) {
 		const lastElement = targetElement.lastElementChild;
