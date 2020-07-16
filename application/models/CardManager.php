@@ -192,8 +192,7 @@ class CardManager extends CI_Model {
 			$table = 'daifugo_hand';
 		}
 
-		$idList = explode(',', $selectingCards);
-		foreach ($idList as $cardId) {
+		foreach ($selectingCards as $cardId) {
 			$this->db->set('used_flg', true);
 			$this->db->where(array('game_id' => $gameId, 'card_id' => $cardId));
 			$this->db->update($table);
@@ -321,9 +320,13 @@ class CardManager extends CI_Model {
 	 * update selecting card's used_flg to true
 	 * @param  int $userId
 	 * @param  Array $selectingCardArray
-	 * @return Array $cardList
 	 */
 	public function updateSelectingCards($userId, $selectingCardArray) {
+		log_message('debug', 'CardManager argArray: ' . print_r($selectingCardArray, true));
+		if (empty($userId) || empty($selectingCardArray)) {
+			return null;
+		}
+
 		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
 		$table = '';
 		if (strpos($gameId, CardManager::$GAME_NAME) !== false) {
