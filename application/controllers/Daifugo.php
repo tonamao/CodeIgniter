@@ -92,13 +92,13 @@ class Daifugo extends CI_Controller {
 		$playerNum = $this->gameMatching->getNumOfPlayer();
 		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
 		$data['back'] = $this->cardManager->getCardBack();
-		$data['game_area_cards'] = $this->cardManager->getUsedCards();
 		$data['cards_used_in_current_turn'] = $this->cardManager->updateSelectingCards($userId, $selectingCards);
-		log_message('debug', 'Response [CardList] is ' . print_r($data['cards_used_in_current_turn'], true));
+		$data['cards_cpu_used_in_current_turn'] = $this->cardManager->useCpuHands($this->gameMatching->getGameIdByUserId($userId), 3, 2);
+		$data['game_area_cards'] = $this->cardManager->getUsedCards();
+		log_message('debug', 'Response [cards_used_in_current_turn]: ' . print_r($data['cards_used_in_current_turn'], true));
+		log_message('debug', 'Response [cards_cpu_used_in_current_turn]: ' . print_r($data['cards_cpu_used_in_current_turn'], true));
 
-		//TODO:CPUが出すカードをランダムで生成
-		//TODO: 出すカードが決まったらDB更新
-		//TODO: 更新後のarea-cardと次のターンのturnIdを詰める
+		//TODO: 更新後の次のターンのturnIdを詰める
 
 		//$dataをJSONにして返す
 		log_message('debug', '---Daifugo.put() End---');

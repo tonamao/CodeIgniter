@@ -4,7 +4,7 @@ class GameManager extends CI_Model {
 
 	public function __construct() {
 		$this->load->helper('url_helper');
-        $this->load->database();
+		$this->load->database();
 	}
 
 	/**
@@ -19,7 +19,7 @@ class GameManager extends CI_Model {
 		$turnOwner = $userTurn;
 		$passNum = $passFlg == true ? 1 : 0;
 		$gameEndFlg = false;
-		$gameStatusId = $gameId.'-T'.$gameTurn.'-O'.$userId;//DFG0-T{gameTurn}-O{userId}
+		$gameStatusId = $gameId . '-T' . $gameTurn . '-O' . $userId; //DFG0-T{gameTurn}-O{userId}
 
 		if ($this->db->count_all('daifugo_game_manager') > 0) {
 			$this->db->where(array('game_id' => $gameId));
@@ -73,7 +73,7 @@ class GameManager extends CI_Model {
 			}
 
 			//game end flg
-		 	$this->db->where(array('game_id' => $gameId, 'used_flg' => false));
+			$this->db->where(array('game_id' => $gameId, 'used_flg' => false));
 			if ($this->db->count_all_results('daifugo_hand') == 0) {
 				$gameEndFlg = true;
 			}
@@ -81,14 +81,16 @@ class GameManager extends CI_Model {
 			//game status id
 			$lastGameStatusId = $latestQuery->row()->game_status_id;
 			$statusCnt = substr($lastGameStatusId, (strpos($lastGameStatusId, 'S') + 1));
-			$gameStatusId = $gameId.'-T'.$gameTurn.'-O'.(++$statusCnt);
+			$gameStatusId = $gameId . '-T' . $gameTurn . '-O' . (++$statusCnt);
 		}
 
 		//insert time
-		date_default_timezone_set('Asia/Tokyo');
 		$now = date('Y-m-d H:i:s');
 
-		if (strpos($gameId, GameManager::$GAME_DAIFUGO) !== false) $table = 'daifugo_game_manager';
+		if (strpos($gameId, GameManager::$GAME_DAIFUGO) !== false) {
+			$table = 'daifugo_game_manager';
+		}
+
 		$insertData = array(
 			'game_status_id' => $gameStatusId,
 			'game_id' => $gameId,
@@ -97,9 +99,10 @@ class GameManager extends CI_Model {
 			'turn_owner' => $turnOwner,
 			'pass_num' => $passNum,
 			'game_end_flg' => $gameEndFlg,
-			'insert_time' => $now
+			'insert_time' => $now,
 		);
 		$this->db->insert($table, $insertData);
+		log_message('debug', 'insertGameStatus() End');
 	}
 
 	/**
@@ -129,7 +132,10 @@ class GameManager extends CI_Model {
 			$userEndFlg = true;
 		}
 
-		if (strpos($gameId, GameManager::$GAME_DAIFUGO) !== false) $table = 'daifugo_user_status';
+		if (strpos($gameId, GameManager::$GAME_DAIFUGO) !== false) {
+			$table = 'daifugo_user_status';
+		}
+
 		$userStatusRecordNum = $this->db->count_all_results('daifugo_user_status');
 		if ($userStatusRecordNum == 0) {
 			$playerNum = $this->db->count_all_results('daifugo_matching');
@@ -147,7 +153,7 @@ class GameManager extends CI_Model {
 					'game_turn' => $gameTurn,
 					'user_id' => $userIdToInsert,
 					'pass_flg' => $passFlgToInsert,
-					'user_end_flg' => $userEndFlg
+					'user_end_flg' => $userEndFlg,
 				);
 				$this->db->insert($table, $insertData);
 			}
@@ -158,7 +164,7 @@ class GameManager extends CI_Model {
 				'game_turn' => $gameTurn,
 				'user_id' => $userId,
 				'pass_flg' => $passFlg,
-				'user_end_flg' => $userEndFlg
+				'user_end_flg' => $userEndFlg,
 			);
 			$this->db->where(array('game_id' => $gameId, 'user_id' => $userId));
 			$this->db->update($table, $updateData);
@@ -172,7 +178,7 @@ class GameManager extends CI_Model {
 	public function checkUserEnd($latestGameStatusId) {
 		return $this->db->get_where('daifugo_user_status', array('game_status_id' => $latestGameStatusId))->row()->user_end_flg;
 	}
-  
+
 	public function getMasterTrumpCloverA() {
 		return $this->db->get_where('ms_trump_card', array('card_id' => 1))->row()->card_name;
 	}

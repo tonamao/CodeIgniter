@@ -10,7 +10,9 @@ class GameMatching extends CI_Model {
 	 */
 	public function insertGameMatching($gameName) {
 		//TODO: get table name, game name from like const class;
-		if ($gameName == 'DFG') $table = 'daifugo_matching';
+		if ($gameName == 'DFG') {
+			$table = 'daifugo_matching';
+		}
 
 		//TODO get all user ids
 		$userIds = array('user0', 'cpu1', 'cpu2', 'cpu3');
@@ -23,11 +25,11 @@ class GameMatching extends CI_Model {
 		$order = 1;
 		foreach ($userIds as $key => $userId) {
 			$insertData = array(
-				'game_id' => $gameName.$maxGameIdCnt,
+				'game_id' => $gameName . $maxGameIdCnt,
 				'user_id' => $userId,
 				'user_category_id' => $userCategoryIds[$cnt++],
 				'game_order' => $order++,
-				'playing_flg' => true
+				'playing_flg' => true,
 			);
 			$this->db->insert($table, $insertData);
 		}
@@ -36,5 +38,14 @@ class GameMatching extends CI_Model {
 	//TODO get num of players from daifugo_matching
 	public function getNumOfPlayer() {
 		return 4;
+	}
+
+	/**
+	 * get game id by user id
+	 * @param  String $userId
+	 * @return String $gameId
+	 */
+	public function getGameIdByUserId($userId) {
+		return $this->db->get_where('daifugo_matching', array('user_id' => $userId))->row()->game_id;
 	}
 }
