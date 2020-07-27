@@ -370,17 +370,15 @@ class CardManager extends CI_Model {
 		for ($i = 0; $i < $cpuNum; $i++) {
 			array_push($cpuIdArray, 'cpu' . ($i + 1));
 		}
-		log_message('debug', 'cpu id : ' . print_r($cpuIdArray, true));
 
 		// get all cpu hands from db
-		$this->db->select('user_id, card_id');
-		$this->db->where('game_id', $gameId);
-		$this->db->where('used_flg', false);
-		$conditionsArray = [];
-		foreach ($cpuIdArray as $cpuId) {
-			$this->db->or_where('user_id', $cpuId);
-		}
+		$this->db->reset_query();
+		$this->db->select('user_id, card_id')
+			->where('game_id', $gameId)
+			->where('used_flg', false);
+		$this->db->where_in('user_id', $cpuIdArray);
 		$records = $this->db->get($table)->result_array();
+
 		// grouping data by cpu id
 		$cpuAllHand = [];
 		foreach ($cpuIdArray as $cpuId) {
@@ -392,11 +390,11 @@ class CardManager extends CI_Model {
 			}
 			$cpuAllHand += array($cpuId => $cardIdArray);
 		}
-		log_message('debug', '$cpuAllHand : ' . print_r($cpuAllHand, true));
 
 		// select putting card randomly
 		$selectingCards = [];
 		foreach ($cpuAllHand as $cpuId => $cardIdArray) {
+			log_message('debug', 'card id by CPU; : ' . print_r($cardIdArray, true));
 
 			$randomIndexArray = array_rand($cardIdArray, $selectingNum);
 			$selectedCardByCpu = [];
@@ -430,7 +428,6 @@ class CardManager extends CI_Model {
 			$cardList += [$cpuId => $cardArray];
 		}
 
-		log_message('debug', 'Response($cardList) : ' . print_r($cardList, true));
 		log_message('debug', 'CardManager.updateCpuHand() End');
 		return $cardList;
 	}
