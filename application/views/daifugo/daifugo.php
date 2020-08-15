@@ -11,20 +11,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </head>
 <body>
 	<div class="cpu-area">
-      <?php for($i = 1; $i < count($all_hands); $i++) {?>
+      <?php for ($i = 1; $i < count($all_hands); $i++) {
+	?>
 		    <div class="cpu <?php echo $i ?>">CPU<?php echo $i ?>
 				<div class="hand">
-					<?php foreach ($all_hands[$i] as $key => $idPath) :?>
-						<?php foreach ($idPath as $id => $path) :?>
+					<?php foreach ($all_hands[$i] as $key => $idPath): ?>
+						<?php foreach ($idPath as $id => $path): ?>
 							<?php $card_prop = array(
-												'src' => $back,
-												'id' => $id,
-												'width' => '40',
-												'height' => 'auto'
-										);
-							echo img($card_prop); ?>
-						<?php endforeach; ?>
-					<?php endforeach; ?>
+		'src' => $back,
+		'id' => $id,
+		'width' => '40',
+		'height' => 'auto',
+	);
+	echo img($card_prop);?>
+						<?php endforeach;?>
+					<?php endforeach;?>
 				</div>
 			</div>
       <?php }?>
@@ -32,88 +33,85 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="game-area">
 		<div class="cards" id="game-cards">
 			<?php $cnt = 0;?>
-	      	<?php foreach ($game_area_cards as $key => $cardIds) :?>
-	      		<?php 
-	      			$index = $cnt + 1;
-	      			$l = 0;
-	      			$t = 0;
-	      			if ($index % 2 == 0) {//2
-	      				$l = 50;
-	      				$t = 24;
-	      				if ($index % 4 == 0) {//4
-	      					$l = 43;
-	      					$t = 30;
-	      				}
-	      			} else {//1
-	      				$l = 45;
-	      				$t = "auto";
-	      				if (($index + 1) % 4 == 0) {//3
-	      					$l = 48;
-	      					$t = 36;
-	      				}
-	      			}
-	      		?>
-	      		<?php $leftCnt = 0; ?>
-	      		<?php foreach ($cardIds as $key => $pathArray) :?>
+	      	<?php foreach ($game_area_cards as $key => $cardIds): ?>
+	      		<?php
+$index = $cnt + 1;
+$l = 0;
+$t = 0;
+if ($index % 2 == 0) {
+//2
+	$l = 50;
+	$t = 24;
+	if ($index % 4 == 0) {
+//4
+		$l = 43;
+		$t = 30;
+	}
+} else {
+//1
+	$l = 45;
+	$t = "auto";
+	if (($index + 1) % 4 == 0) {
+//3
+		$l = 48;
+		$t = 36;
+	}
+}
+?>
+	      		<?php $leftCnt = 0;?>
+	      		<?php foreach ($cardIds as $key => $pathArray): ?>
 	      			<?php
-	      				$length = count($pathArray);
-	      				$firstLeft = $l - (($length - 1) / 2) + $leftCnt; 
-	      			?>
-	      			<?php foreach ($pathArray as $cardId => $path) :?>
-						<div class="card img" id="location-<?php echo $index;?>"
-							style="z-index:<?php echo $index;?>;
-									left:<?php echo $firstLeft.'%'; ?>;
-									top:<?php echo $t == 'auto' ? $t : $t.'%';  ?>;">
+$length = count($pathArray);
+$firstLeft = $l - (($length - 1) / 2) + $leftCnt;
+?>
+	      			<?php foreach ($pathArray as $cardId => $path): ?>
+						<div class="card img" id="location-<?php echo $index; ?>"
+							style="z-index:<?php echo $index; ?>;
+									left:<?php echo $firstLeft . '%'; ?>;
+									top:<?php echo $t == 'auto' ? $t : $t . '%'; ?>;">
 							<?php
-							$card_prop = array(
-											'src' => $path,
-											'id' => 'img-location-'."$index",
-											'width' => '90',
-											'height' => 'auto'
-										);
-							echo img($card_prop); ?>
+$card_prop = array(
+	'src' => $path,
+	'id' => 'img-location-' . "$index",
+	'width' => '90',
+	'height' => 'auto',
+);
+echo img($card_prop);?>
 						</div>
-	      			<?php endforeach; ?>
-	      			<?php $leftCnt += 1; ?>
-	      		<?php endforeach; ?>
+	      			<?php endforeach;?>
+	      			<?php $leftCnt += 1;?>
+	      		<?php endforeach;?>
 	      		<?php $cnt++;?>
-	      	<?php endforeach; ?>
+	      	<?php endforeach;?>
 	    </div>
 	</div>
 	<div class="user-area">
-		<?php echo form_open('daifugo/put'); ?>
-            <input type="submit" name="put" id="put" class="btn-square-so-pop" value="出す">
-            <input type="hidden" name="hidden-put" id="hidden-put">
-        </form>
-		<?php echo form_open('daifugo/pass'); ?>
-            <input type="submit" name="pass" id="pass" class="btn-square-so-pop" value="パス">
-            <input type="hidden" name="hidden-pass" id="hidden-pass">
-        </form>
+		<div id="put" class="btn-square-so-pop">出す</div>
+		<div id="pass" class="btn-square-so-pop">パス</div>
 		<div id="test-btn" class="btn-square-so-pop">TEST-BUTTON</div>
 		<div class="hand" id="user-hand">
-			<?php $i = 0;
-			foreach ($all_hands[0] as $key => $idPath): ?>
-				<?php foreach ($idPath as $id => $path) :?>
+			<?php $i = 0;foreach ($all_hands[0] as $key => $idPath): ?>
+				<?php foreach ($idPath as $id => $path): ?>
 					<?php $card_prop = array(
-										'src' => $path,
-										'id' => 'img'.$id,
-										'class' => 'img'.$i++,
-										'width' => '90',
-										'height' => 'auto'
-								);
-					echo img($card_prop); ?>
-				<?php endforeach; ?>
-			<?php endforeach; ?>
+	'src' => $path,
+	'id' => $id,
+	'class' => 'img' . $i++,
+	'width' => '90',
+	'height' => 'auto',
+);
+echo img($card_prop);?>
+				<?php endforeach;?>
+			<?php endforeach;?>
 		</div>
 		<div class="status">
 			<div class="icon">
 				<?php
-				$icon_prop = array(
-							'src' => 'assets/img/testicon.png',
-							'width' => '50',
-							'height' => 'auto'
-						);
-				echo img($icon_prop);?>	
+$icon_prop = array(
+	'src' => 'assets/img/testicon.png',
+	'width' => '50',
+	'height' => 'auto',
+);
+echo img($icon_prop);?>
 			</div>
 			<div class="info">
 					<div class="name">ユーザーネーム</div>
@@ -129,25 +127,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<div id="test-img"></div>
 	</div>
 	<div>
-		<div>CPU1 <?php echo count($all_hands[1])?>枚</div>
-			<?php foreach ($all_hands[1] as $key
-			=> $idPath): ?>
+		<div>CPU1 <?php echo count($all_hands[1]) ?>枚</div>
+			<?php foreach ($all_hands[1] as $key => $idPath): ?>
 				<?php foreach ($idPath as $id => $path): ?>
 					<?php echo $path; ?>
-				<?php endforeach; ?>
-			<?php endforeach; ?>
-		<div>CPU2 <?php echo count($all_hands[2])?>枚</div>
+				<?php endforeach;?>
+			<?php endforeach;?>
+		<div>CPU2 <?php echo count($all_hands[2]) ?>枚</div>
 			<?php foreach ($all_hands[2] as $key => $idPath): ?>
 				<?php foreach ($idPath as $id => $path): ?>
 					<?php echo $path; ?>
-				<?php endforeach; ?>
-			<?php endforeach; ?>
-		<div>CPU3 <?php echo count($all_hands[3])?>枚</div>
+				<?php endforeach;?>
+			<?php endforeach;?>
+		<div>CPU3 <?php echo count($all_hands[3]) ?>枚</div>
 			<?php foreach ($all_hands[3] as $key => $idPath): ?>
 				<?php foreach ($idPath as $id => $path): ?>
 					<?php echo $path; ?>
-				<?php endforeach; ?>
-			<?php endforeach; ?>
+				<?php endforeach;?>
+			<?php endforeach;?>
 	</div>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/daifugo.js"></script>
 </body>
