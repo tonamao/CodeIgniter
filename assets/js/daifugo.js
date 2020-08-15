@@ -102,11 +102,8 @@
 	function test() {
 		let postData = {
 			userId: getUserId(),
-			passFlg: false,
 			cards: getSelectedCards()
 		}
-
-		alert(`cards: ${postData.cards}`);
 
 		if (!postData.cards) {
 			return;
@@ -120,23 +117,9 @@
 			dataType: 'json', //サーバからくるデータの形式を指定
 
 			success: function(data) {
-
-				const selectedCards = data.cards_used_in_current_turn;
-				if (!selectedCards) {
-					return;
-				}
-
-				// 手札から出したカードを消す
-				const handsElement = document.getElementById("user-hand");
-				console.log(`handsElement: ${handsElement}`);
-				// deleteCarads(selectedCards, handsElement);
-				deleteCarads(selectedCards, USER_HAND_ELM);
-
-				// 選択したカードをajax-testに表示する
-				const usedCardElements = generateGameAreaCardElm(selectedCards, GAME_AREA_CARD_ELM);
-				usedCardElements.forEach(element => GAME_AREA_CARD_ELM.insertAdjacentHTML('beforeend', element));
-
-
+				userPlayingMove(data.cards_used_in_current_turn);
+				cpuPlayingMove(data.cards_cpu_used_in_current_turn);
+				//turnId 的なのもサーバから受け取る
 				//TODO : 最後にターンIDで画面遷移？
 				//window.location.href = 'http://localhost/test/client/btns';
 			},
