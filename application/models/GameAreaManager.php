@@ -13,8 +13,8 @@ class GameAreaManager extends CI_Model {
 	 */
 	public function insertGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards) {
 		log_message('debug', 'GameAreaManager::insertGameAreaStatus() Start');
-		$gameId = $this->db->get_where('daifugo_game_status', array('id' => $latestGameStatusId))->row()->game_id;
-		$turnEndFlg = $this->db->get_where('daifugo_turn_status', array('game_status_id' => $latestGameStatusId))->row()->turn_end_flg;
+		$gameId = $this->db->get_where('tb_daifugo_game_status', array('id' => $latestGameStatusId))->row()->game_id;
+		$turnEndFlg = $this->db->get_where('tb_daifugo_turn_status', array('game_status_id' => $latestGameStatusId))->row()->turn_end_flg;
 
 		if ($passFlg) {
 			// case pass(update)
@@ -27,7 +27,7 @@ class GameAreaManager extends CI_Model {
 					'game_id' => $gameId,
 					'game_status_id' => $latestGameStatusId,
 					'discard_flg' => false));
-				$this->db->update('daifugo_game_area_card', $updateData);
+				$this->db->update('tb_daifugo_game_area_card', $updateData);
 			}
 		} else {
 			//case put(insert)
@@ -44,7 +44,7 @@ class GameAreaManager extends CI_Model {
 				'card_ids' => $selectingCardIds,
 				'discard_flg' => false,
 			);
-			$this->db->insert('daifugo_game_area_card', $insertData);
+			$this->db->insert('tb_daifugo_game_area_card', $insertData);
 		}
 		log_message('debug', 'GameAreaManager::insertGameAreaStatus() Start');
 	}

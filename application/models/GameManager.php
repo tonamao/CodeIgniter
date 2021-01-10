@@ -12,19 +12,19 @@ class GameManager extends CI_Model {
 	 */
 	public function insertGameStatus($userId, $passFlg) {
 		log_message('debug', 'GameManager::insertGameStatus() Start');
-		$gameId = $this->db->get_where('daifugo_matching', array('player_1' => 'user0', 'playing_flg' => true))->row()->game_id;
+		$gameId = $this->db->get_where('tb_daifugo_matching', array('player_1' => 'user0', 'playing_flg' => true))->row()->game_id;
 		$gameTurn = 1;
 		$turnOwner = $userId;
 		$passNum = 0;
 		$gameEndFlg = false;
 		$playerNum = 4; //TODO: 動的に取れるようにする
 
-		if ($this->db->count_all('daifugo_game_status') > 0) {
+		if ($this->db->count_all('tb_daifugo_game_status') > 0) {
 			$this->db->where(array('game_id' => $gameId));
 
 			$this->db->limit(1)
 				->order_by('insert_time', 'DESC');
-			$latestRow = $this->db->get('daifugo_game_status')->row();
+			$latestRow = $this->db->get('tb_daifugo_game_status')->row();
 
 			//turn owner
 			if ($passFlg) {
@@ -40,7 +40,7 @@ class GameManager extends CI_Model {
 			$numOfHnadPerUser = $this->db->select('count(*) as count')
 				->where('game_id', $gameId)
 				->group_by('user_id')
-				->get('daifugo_hand')->result_array();
+				->get('tb_daifugo_hand')->result_array();
 
 			$cnt = 0;
 			foreach ($numOfHnadPerUser as $key => $num) {
@@ -59,13 +59,13 @@ class GameManager extends CI_Model {
 			'game_end_flg' => $gameEndFlg,
 			'insert_time' => date('Y-m-d H:i:s'),
 		);
-		$this->db->insert('daifugo_game_status', $gameStatusData);
+		$this->db->insert('tb_daifugo_game_status', $gameStatusData);
 
 		// turn end flg
 		$turnEndFlg = $passNum == ($playerNum - 1) ? true : false;
 		$this->db->limit(1)
 			->order_by('insert_time', 'DESC');
-		$insertedRow = $this->db->get('daifugo_game_status')->row();
+		$insertedRow = $this->db->get('tb_daifugo_game_status')->row();
 
 		// insert turn status
 		$turnStatusData = array(
@@ -76,7 +76,7 @@ class GameManager extends CI_Model {
 			'pass_num' => $passNum,
 			'turn_end_flg' => $turnEndFlg,
 		);
-		$this->db->insert('daifugo_turn_status', $turnStatusData);
+		$this->db->insert('tb_daifugo_turn_status', $turnStatusData);
 		log_message('debug', 'GameManager::insertGameStatus() End');
 	}
 
@@ -85,7 +85,7 @@ class GameManager extends CI_Model {
 	 * @return gameStatusId
 	 */
 	public function getLatestGameStatus() {
-		$latestQuery = $this->db->query('SELECT * FROM daifugo_game_status WHERE insert_time = (SELECT MAX(insert_time) FROM daifugo_game_status)');
+		$latestQuery = $this->db->query('SELECT * FROM tb_daifugo_game_status WHERE insert_time = (SELECT MAX(insert_time) FROM tb_daifugo_game_status)');
 		$gameStatusId = $latestQuery->row()->id;
 		return $gameStatusId;
 	}
@@ -96,7 +96,7 @@ class GameManager extends CI_Model {
 	 */
 	public function insertUserStatus($latestGameStatusId, $userId, $userEndFlg) {
 		log_message('debug', 'GameManager::insertUserStatus() Start');
-		$gameId = $this->db->get_where('daifugo_game_status', array('id' => $latestGameStatusId))->row()->game_id;
+		$gameId = $this->db->get_where('tb_daifugo_game_status', array('id' => $latestGameStatusId))->row()->game_id;
 
 		$insertData = array(
 			'game_status_id' => $latestGameStatusId,
@@ -104,7 +104,7 @@ class GameManager extends CI_Model {
 			'user_id' => $userId,
 			'user_end_flg' => $userEndFlg,
 		);
-		$this->db->insert('daifugo_user_status', $insertData);
+		$this->db->insert('tb_daifugo_user_status', $insertData);
 		log_message('debug', 'GameManager::insertUserStatus() End');
 	}
 
@@ -113,7 +113,7 @@ class GameManager extends CI_Model {
 	 * @return user end flg
 	 */
 	public function checkUserEnd($latestGameStatusId) {
-		return $this->db->get_where('daifugo_user_status', array('id' => $latestGameStatusId))->row()->user_end_flg;
+		return $this->db->get_where('tb_daifugo_user_status', array('id' => $latestGameStatusId))->row()->user_end_flg;
 	}
 
 	public function getMasterTrumpCloverA() {

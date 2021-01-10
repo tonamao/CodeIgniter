@@ -17,7 +17,7 @@ class GameMatching extends CI_Model {
 			'player_4' => 'cpu3',
 			'playing_flg' => true,
 		);
-		$this->db->insert('daifugo_matching', $insertData);
+		$this->db->insert('tb_daifugo_matching', $insertData);
 
 	}
 
@@ -33,6 +33,6 @@ class GameMatching extends CI_Model {
 	 */
 	public function getGameIdByUserId($userId) {
 		// TODO: ユーザに紐づくゲーム情報が複数になった場合は修正する
-		return $this->db->get_where('daifugo_matching', array('player_1' => $userId, 'playing_flg' => true))->row()->game_id;
+		return $this->db->get_where('tb_daifugo_matching', array('player_1' => $userId, 'playing_flg' => true))->row()->game_id;
 	}
 }
