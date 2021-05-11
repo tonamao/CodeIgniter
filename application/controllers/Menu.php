@@ -9,7 +9,6 @@ class Menu extends CI_Controller {
 	}
 	public function games()
 	{
-		//TODO: ゲーム情報をDBから取ってくる
 		$data['gameInfo'] = $this->masterDataManager->getGameInfo();
 		$this->load->view('menu', $data);
 	}
