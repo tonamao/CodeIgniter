@@ -16,6 +16,6 @@ class RuleManager extends CI_Model {
 	//TODO: check rules
 	public function checkRules($ruleList, $selectingCards) {
 
-		return false;
+		return true;
 	}
 }

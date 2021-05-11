@@ -11,7 +11,6 @@ class GameManager extends CI_Model {
 	 * insert game status, turn status (daifugo_game_status, daifugo_turn_status)
 	 */
 	public function insertGameStatus($userId, $passFlg) {
-		log_message('debug', 'GameManager::insertGameStatus() Start');
 		$gameId = $this->db->get_where('daifugo_matching', array('player_1' => 'user0', 'playing_flg' => true))->row()->game_id;
 		$gameTurn = 1;
 		$turnOwner = $userId;
@@ -23,7 +22,7 @@ class GameManager extends CI_Model {
 			$this->db->where(array('game_id' => $gameId));
 
 			$this->db->limit(1)
-				->order_by('insert_time', 'DESC');
+				->order_by('updated_at', 'DESC');
 			$latestRow = $this->db->get('daifugo_game_status')->row();
 
 			//turn owner
@@ -57,27 +56,26 @@ class GameManager extends CI_Model {
 		$gameStatusData = array(
 			'game_id' => $gameId,
 			'game_end_flg' => $gameEndFlg,
-			'insert_time' => date('Y-m-d H:i:s'),
 		);
 		$this->db->insert('daifugo_game_status', $gameStatusData);
 
 		// turn end flg
 		$turnEndFlg = $passNum == ($playerNum - 1) ? true : false;
-		$this->db->limit(1)
-			->order_by('insert_time', 'DESC');
+    /**
+    $this->db->limit(1)
+			->order_by('updated_at', 'DESC');
 		$insertedRow = $this->db->get('daifugo_game_status')->row();
+    */
 
 		// insert turn status
 		$turnStatusData = array(
 			'game_id' => $gameId,
-			'game_status_id' => $insertedRow->id,
 			'turn_user' => $userId,
 			'turn_owner' => $turnOwner,
 			'pass_num' => $passNum,
 			'turn_end_flg' => $turnEndFlg,
 		);
 		$this->db->insert('daifugo_turn_status', $turnStatusData);
-		log_message('debug', 'GameManager::insertGameStatus() End');
 	}
 
 	/**
@@ -85,8 +83,8 @@ class GameManager extends CI_Model {
 	 * @return gameStatusId
 	 */
 	public function getLatestGameStatus() {
-		$latestQuery = $this->db->query('SELECT * FROM daifugo_game_status WHERE insert_time = (SELECT MAX(insert_time) FROM daifugo_game_status)');
-		$gameStatusId = $latestQuery->row()->id;
+		$latestQuery = $this->db->query('SELECT game_status_id, MAX(updated_at) FROM daifugo_turn_status;');
+		$gameStatusId = $latestQuery->row()->game_status_id;
 		return $gameStatusId;
 	}
 
