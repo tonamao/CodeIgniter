@@ -12,7 +12,8 @@ class GameAreaManager extends CI_Model {
 	 * insert game area status (daifugo_game_area_card)
 	 */
 	public function insertGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards) {
-		$gameId = $this->db->get_where('daifugo_matching', array('player_1' => 'user0', 'playing_flg' => true))->row()->game_id;
+		log_message('debug', 'GameAreaManager::insertGameAreaStatus() Start');
+		$gameId = $this->db->get_where('daifugo_game_status', array('id' => $latestGameStatusId))->row()->game_id;
 		$turnEndFlg = $this->db->get_where('daifugo_turn_status', array('game_status_id' => $latestGameStatusId))->row()->turn_end_flg;
 
 		if ($passFlg) {
@@ -45,5 +46,6 @@ class GameAreaManager extends CI_Model {
 			);
 			$this->db->insert('daifugo_game_area_card', $insertData);
 		}
+		log_message('debug', 'GameAreaManager::insertGameAreaStatus() Start');
 	}
 }

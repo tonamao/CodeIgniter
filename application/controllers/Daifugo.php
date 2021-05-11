@@ -14,7 +14,6 @@ class Daifugo extends CI_Controller {
 		$this->load->model('ruleManager');
 		$this->load->model('gameManager');
 		$this->load->model('gameAreaManager');
-		$this->load->model('masterDataManager');
 		$this->load->helper('form');
 		$this->load->library('form_validation');
 
@@ -25,11 +24,10 @@ class Daifugo extends CI_Controller {
 		$this->gameMatching->insertGameMatching(Daifugo::$GAME_NAME);
 
 		//TODO: ルール情報取得
-		$data['gameInfo'] = $this->masterDataManager->getGameInfo();
 
 		//TODO: ルール情報表示
 
-		$this->load->view('daifugo/rule-selection', $data);
+		$this->load->view('daifugo/rule-selection');
 	}
 
 	/**
@@ -122,6 +120,7 @@ class Daifugo extends CI_Controller {
 		log_message('debug', '---Daifugo.pass() Start---');
 		// get ajax data
 		$userId = $this->input->post('userId');
+		log_message('debug', '$userId: ' . $userId);
 		$passFlg = true;
 
 		//update game status
@@ -163,7 +162,7 @@ class Daifugo extends CI_Controller {
 	}
 
 	private function createPutResponse($userId, $userCards, $cpuCards) {
-		log_message('debug', '['.__LINE__.'] create response');
+		log_message('debug', 'create response');
 		$playerNum = $this->gameMatching->getNumOfPlayer();
 		$data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
 		$data['back'] = $this->cardManager->getCardBack();
@@ -182,22 +181,22 @@ class Daifugo extends CI_Controller {
 	/**
 	 * test code for ajax + update db
 	 */
-  public function test() {
-    ////////////////////////////////
-    // Start To Update USER cards //
-    ////////////////////////////////
+	public function test() {
+		log_message('debug', '---Daifugo.put() Start---');
+
+		log_message('debug', 'Daifugo::put() Start to update user status');
+		// update user hand
 		$userId = $this->input->post('userId');
 		$userCardsPosted = $this->input->post('cards');
 		$passFlg = false;
 
 		// TODO: check rule
-		$isMatchingRules = $this->ruleManager->checkRules($this->ruleManager->getRules(), $userCardsPosted);
+		// $isMatchingRules = $this->ruleManager->checkRules($this->ruleManager->getRules(), $selectingCards);
 		$userEndFlg = false;
-    $userCardsObj = null;
-    if ($isMatchingRules) {
+		$isMatchingRules = true;
+		if ($isMatchingRules) {
 			// $userEndFlg = $this->cardManager->updateCardToUsed($userId, $userCards);
-		  // update user hand
-			$userCardsObj = $this->cardManager->updateCardToUsed($userId, $userCardsPosted);// FIXME: gameId事前に取っておいて引数に入れる
+			$userCardsObj = $this->cardManager->updateCardToUsed($userId, $userCardsPosted);
 		}
 
 		// update game status for user
@@ -206,13 +205,18 @@ class Daifugo extends CI_Controller {
 		// update game area cards for user
 		$this->gameAreaManager->insertGameAreaStatus($passFlg, $latestGameStatusId, $userCardsPosted);
 
-    ///////////////////////////////
-    // Start To Update CPU cards //
-    ///////////////////////////////
-    $cpuNum = 3; //TODO: 動的に取得する
+		log_message('debug', 'Daifugo::put() End to update user status');
+
+		// TODO: ユーザの終了判定
+		// TODO:　ゲームの終了判定
+
+		log_message('debug', 'Daifugo::put() Start to update CPUs status');
+
+		$cpuNum = 3; //TODO: 動的に取得する
 		$cpuCardNum = 2; //TODO: 動的に取得する
 		$cpuCards = $this->cardManager->useCpuHands($this->gameMatching->getGameIdByUserId($userId), $cpuNum, $cpuCardNum); //TODO: 前の人が出したカードを見てカードを選ぶようにする
 		foreach ($cpuCards as $cpuId => $cardArray) {
+
 			// update CPU hand
 			$cpuEndFlg = $this->cardManager->getPlayerEndFlg($cpuId);
 			// update game status for user
@@ -220,16 +224,18 @@ class Daifugo extends CI_Controller {
 			$latestGameStatusId = $this->updateGameStatus($cpuId, $cpuEndFlg, $passFlg);
 			// update game area cards for user
 			$this->gameAreaManager->insertGameAreaStatus($passFlg, $latestGameStatusId, $cardArray);
+
 		}
 
-    /////////////////////
-    // create response //
-    /////////////////////
+		log_message('debug', 'Daifugo::put() End to update CPUs status');
+
+		// create response
 		$data = $this->createPutResponse($userId, $userCardsObj, $this->cardManager->convertCpuCards($cpuCards));
 
 		//TODO: 更新後の次のターンのturnIdを詰める
 
 		//$dataをJSONにして返す
+		log_message('debug', '---Daifugo.put() End---');
 		$this->output
 			->set_content_type('application/json')
 			->set_output(json_encode($data));
