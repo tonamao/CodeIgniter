@@ -3,7 +3,6 @@ class CardManager extends CI_Model {
 	public static $GAME_NAME = 'DFG';
 
 	public function __construct() {
-		$this->load->helper('url_helper');
 		$this->load->helper('array');
 		$this->load->database();
 	}
@@ -104,7 +103,7 @@ class CardManager extends CI_Model {
 
 		//insert DB
 		$userId = 'user0'; //TODO: user id(from session?)
-		$gameId = $this->db->get_where('daifugo_matching', array('player_1' => $userId, 'playing_flg' => true))->row()->game_id;
+		$gameId = $this->db->get_where('tb_daifugo_matching', array('player_1' => $userId, 'playing_flg' => true))->row()->game_id;
 		$userIdArray = array('user0', 'cpu1', 'cpu2', 'cpu3');
 		foreach ($allPlayerCardsList as $playerIndex => $playerHandArray) {
 			$playerId = $userIdArray[$playerIndex];
@@ -150,7 +149,7 @@ class CardManager extends CI_Model {
 					'used_flg' => false,
 					'strength_level' => $level,
 				);
-				$this->db->insert('daifugo_hand', $cardData);
+				$this->db->insert('tb_daifugo_hand', $cardData);
 			}
 		}
 		//TODO output result of insert DB log
@@ -161,7 +160,7 @@ class CardManager extends CI_Model {
 		for ($i = 0; $i < $playerNum; $i++) {
 			$this->db->order_by('strength_level', 'ASC');
 			$handQuery = $this->db->get_where(
-				'daifugo_hand', array('user_id' => $userIdArray[$i]));
+				'tb_daifugo_hand', array('user_id' => $userIdArray[$i]));
 			$singleHand = array();
 			foreach ($handQuery->result() as $handRow) {
 				$cardId = $handRow->card_id;
