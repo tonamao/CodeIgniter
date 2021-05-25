@@ -182,8 +182,6 @@ class CardManager extends CI_Model {
 	}
 
 	public function updateCardToUsed($userId, $targetCards) {
-		log_message('debug', 'CardManager::updateCardToUsed() Start');
-		log_message('debug', 'user id : ' . $userId . ' tartget cards : ' . print_r($targetCards, true));
 
 		// カードを使用済みに更新する
 		$gameId = $this->db->get_where('daifugo_matching', array('player_1' => 'user0', 'playing_flg' => true))->row()->game_id;
@@ -192,6 +190,7 @@ class CardManager extends CI_Model {
 			$this->db->where(array('game_id' => $gameId, 'card_id' => $cardId));
 			$this->db->update('daifugo_hand');
 		}
+		log_message('debug', __METHOD__."[".__LINE__."]".'USER card : ' . print_r($targetCards, true));
 
 		// CardListを返す
 		require_once 'Entity/Card.php';
@@ -203,7 +202,6 @@ class CardManager extends CI_Model {
 			$card->setCardImg('assets/img/cards/' . $cardName . '.png');
 			array_push($cardList, $card);
 		}
-		log_message('debug', 'CardManager::updateCardToUsed() End');
 		return $cardList;
 	}
 
@@ -219,8 +217,7 @@ class CardManager extends CI_Model {
 	 *			)...
 	 */
 	public function getLatestHand($playerNum, $userId) {
-		log_message('debug', 'CardManager::getLatestHand() Start');
-		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
+		$gameId = $this->db->get_where('daifugo_matching', array('player_1' => $userId, 'playing_flg' => true))->row()->game_id;
 		$userIdArray = array('user0', 'cpu1', 'cpu2', 'cpu3');
 
 		$imgPathListOfHands = array();
@@ -236,7 +233,6 @@ class CardManager extends CI_Model {
 			}
 			array_push($imgPathListOfHands, $singleHand);
 		}
-		log_message('debug', 'CardManager::getLatestHand() End');
 		return $imgPathListOfHands;
 	}
 
@@ -253,11 +249,8 @@ class CardManager extends CI_Model {
 		$allUsedCards = array();
 		//TODO: get user id
 		$userId = 'user0';
-		$table = '';
-		$gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
-		if (strpos($gameId, CardManager::$GAME_NAME) !== false) {
-			$table = 'daifugo_game_area_card';
-		}
+		$gameId = $this->db->get_where('daifugo_matching', array('player_1' => $userId, 'playing_flg' => true))->row()->game_id;
+		$table = 'daifugo_game_area_card';
 
 		//card idの連想配列を作る
 		$allCardIdsArray = array();
@@ -331,7 +324,6 @@ class CardManager extends CI_Model {
 	 * @return Array selectingCards
 	 */
 	public function useCpuHands($gameId, $cpuNum, $selectingNum) {
-		log_message('debug', 'CardManager.updateCpuHand() Start');
 		$table = 'daifugo_hand'; // FIXME: daifugo ではないものも取れるようにする
 
 		// create cpu id from cpu num
@@ -373,7 +365,7 @@ class CardManager extends CI_Model {
 
 			// $selectingCards += array($cpuId => $cardIdArray[array_rand($cardIdArray, 1)]); // ランダムに１つ選ぶ
 		}
-		log_message('debug', 'CPU $selectingCards : ' . print_r($selectingCards, true));
+		log_message('debug', __METHOD__."[".__LINE__."]".'CPU $selectingCards : ' . print_r($selectingCards, true));
 
 		// update cpu hands
 		require_once 'Entity/Card.php';
@@ -396,18 +388,12 @@ class CardManager extends CI_Model {
 			$cardList += [$cpuId => $cardArray];
 		}
 
-		log_message('debug', 'CardManager.updateCpuHand() End');
 		return $selectingCards;
 	}
 
 	public function getPlayerEndFlg($playerId) {
-		$endFlg = false;
 		$this->db->where('user_id', $playerId);
-		if (0 == $this->db->count_all_results('daifugo_hand')) {
-			$endFlg = true;
-		}
-		return $endFlg;
-
+		return 0 == $this->db->count_all_results('daifugo_hand');
 	}
 
 	public function convertCpuCards($cpuCards) {
