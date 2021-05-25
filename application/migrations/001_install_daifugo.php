@@ -11,11 +11,11 @@ class Migration_Install_daifugo extends CI_Migration
         'ms_game',
         'ms_trump_card',
         // transaction tables.
-        'tb_user_playing_game',
         'tb_daifugo_matching',
-        'tb_daifugo_game_manager',
         'tb_daifugo_hand',
+        'tb_daifugo_game_status',
         'tb_daifugo_user_status',
+        'tb_daifugo_turn_status',
         'tb_daifugo_game_area_card',
         'tb_daifugo_result',
     ];
@@ -23,10 +23,10 @@ class Migration_Install_daifugo extends CI_Migration
     public static $cleate_tables = [
         'ms_game' => [
             'fields' => [
-                'id'          => ['type' => 'INT',     'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
-                'name'        => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'img_path'    => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'description' => ['type' => 'TEXT',    'null' => true],
+                'id'           => ['type' => 'INT',     'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+                'display_name' => ['type' => 'VARCHAR', 'constraint' => 100, 'null' => false],
+                'img_path'     => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
+                'description'  => ['type' => 'TEXT',    'null' => true],
             ],
             'keys' => [
                 'id' => true,
@@ -41,49 +41,28 @@ class Migration_Install_daifugo extends CI_Migration
                 'card_id' => true,
             ],
         ],
-        'tb_user_playing_game' => [
-            'fields' => [
-                'user_id' => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'game_id' => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-            ],
-            'keys' => [
-                'user_id' => true,
-            ],
-        ],
         'tb_daifugo_matching' => [
             'fields' => [
-                'game_id'          => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'user_id'          => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'user_category_id' => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'game_order'       => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'playing_flg'      => ['type' => 'TINYINT', 'null' => false],
+                'game_id'     => ['type' => 'MEDIUMINT', 'auto_increment' => true, 'constraint' => 255, 'null' => false],
+                'player_1'    => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'player_2'    => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'player_3'    => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'player_4'    => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'game_order'  => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'rule_ids'    => ['type' => 'VARCHAR',   'constraint' => 100, 'null' => false],
+                'playing_flg' => ['type' => 'TINYINT',   'null' => false],
             ],
             'keys' => [
                 'game_id' => true,
             ],
         ],
-        'tb_daifugo_game_manager' => [
-            'fields' => [
-                'game_status_id' => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'game_id'        => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'game_turn'      => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'user_turn'      => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'turn_owner'     => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'pass_num'       => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'game_end_flg'   => ['type' => 'TINYINT', 'null' => false],
-            ],
-            'keys' => [
-                'game_status_id' => true,
-                'game_id'        => true,
-            ],
-        ],
         'tb_daifugo_hand' => [
             'fields' => [
-                'game_id'        => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'user_id'        => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'card_id'        => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'used_flg'       => ['type' => 'TINYINT', 'null' => false],
-                'strength_level' => ['type' => 'INT',     'constraint' => 11,  'null' => false],
+                'game_id'        => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'user_id'        => ['type' => 'MEDIUMINT', 'constraint' => 20,  'null' => false],
+                'card_id'        => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'used_flg'       => ['type' => 'TINYINT',   'null' => false],
+                'strength_level' => ['type' => 'INT',       'constraint' => 11,  'null' => false],
             ],
             'keys' => [
                 'game_id' => true,
@@ -91,41 +70,66 @@ class Migration_Install_daifugo extends CI_Migration
                 'card_id' => true,
             ],
         ],
+        'tb_daifugo_game_status' => [
+            'fields' => [
+                'game_id'      => ['type' => 'MEDIUMINT', 'constraint' => 11,  'null' => false],
+                'game_end_flg' => ['type' => 'TINYINT',   'null' => false],
+            ],
+            'keys' => [
+                'game_id'        => true,
+            ],
+        ],
         'tb_daifugo_user_status' => [
             'fields' => [
-                'game_status_id' => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'game_id'        => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'user_id'        => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'game_turn'      => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'pass_flg'       => ['type' => 'TINYINT', 'null' => false],
-                'user_end_flg'   => ['type' => 'TINYINT', 'null' => false],
+                'game_status_id' => ['type' => 'VARCHAR',   'constraint' => 255, 'null' => false],
+                'game_id'        => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'user_id'        => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'game_turn'      => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'pass_flg'       => ['type' => 'TINYINT',   'null' => false],
+                'user_end_flg'   => ['type' => 'TINYINT',   'null' => false],
             ],
             'keys' => [
                 'game_status_id' => true,
-                'game_id' => true,
-                'user_id' => true,
+                'game_id'        => true,
+                'user_id'        => true,
+            ],
+        ],
+        'tb_daifugo_turn_status' => [
+            'fields' => [
+                'game_status_id' => ['type' => 'MEDIUMINT', 'auto_increment' => true, 'constraint' => 255, 'null' => false],
+                'game_id'        => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'game_turn'      => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'turn_user'      => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'turn_owner'     => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'pass_num'       => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'turn_end_flg'   => ['type' => 'TINYINT',   'null' => false],
+            ],
+            'keys' => [
+                'game_status_id' => true,
+                'game_id'        => true,
             ],
         ],
         'tb_daifugo_game_area_card' => [
             'fields' => [
-                'game_status_id' => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'card_ids'       => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'game_id'        => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'game_turn'      => ['type' => 'INT',     'constraint' => 11,  'null' => false],
-                'discard_flg'    => ['type' => 'TINYINT', 'null' => false],
+                'game_status_id' => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'game_id'        => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'game_turn'      => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'card_ids'       => ['type' => 'VARCHAR',   'constraint' => 255, 'null' => false],
+                'discard_flg'    => ['type' => 'TINYINT',   'null' => false],
             ],
             'keys' => [
                 'game_status_id' => true,
-                'card_ids' => true,
+                'card_ids'       => true,
             ],
         ],
         'tb_daifugo_result' => [
             'fields' => [
                 'game_id'   => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'user_id'   => ['type' => 'INT',     'constraint' => 11,  'null' => false],
+                'user_id'   => ['type' => 'VARCHAR', 'constraint' => 20,  'null' => false],
                 'user_rank' => ['type' => 'INT',     'constraint' => 11,  'null' => false],
             ],
             'keys' => [
+                'game_id' => true,
                 'user_id' => true,
             ],
         ],
@@ -196,257 +200,7 @@ class Migration_Install_daifugo extends CI_Migration
         ];
         $this->db->insert('ms_trump_card', $back_data);
 
-        /**
-         * user_playing_game
-         */
-        $test_user = [
-            'user_id' => '9000000', // idなので数値にしとく
-            'game_id' => 'DFG0' // なにかのhash値でいいかも
-        ];
-        $this->db->insert('tb_user_playing_game', $test_user);
         $this->cEcho('[INFO] Done.', self::COLOR_SUCCESS);
-
-        /**
-         * daifugo_matching
-         */
-        // Drop table 'daifugo_matching' if it exists
-        //$this->dbforge->drop_table('daifugo_matching', TRUE);
-
-        // Table structure for table 'daifugo_matching'
-        //$this->dbforge->add_field([
-        //    'game_id' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255',
-        //        'null'       => FALSE
-        //    ],
-        //    'user_id' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255',
-        //        'null'       => FALSE
-        //    ],
-        //    'user_category_id' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255',
-        //        'null'       => FALSE
-        //    ],
-        //    'game_order' => [
-        //        'type'       => 'INT',
-        //        'null'       => FALSE
-        //    ],
-        //    'playing_flg' => [
-        //        'type'       => 'TINYINT',
-        //        'null'       => FALSE
-        //    ]
-        //]);
-
-        ////Create table 'daifugo_matching'
-        //if ($this->dbforge->create_table('daifugo_matching')) {
-        //    echo 'Create table daifugo_matching Success!' . PHP_EOL;
-        //}
-
-
-        /**
-         * daifugo_game_manager
-         */
-
-        // Table structure for table 'daifugo_game_manager'
-        //$this->dbforge->add_field([
-        //    'game_status_id' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255',
-        //        'null'       => FALSE
-        //    ],
-        //    'game_id' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255',
-        //        'null'       => FALSE
-        //    ],
-        //    'game_turn' => [
-        //        'type'       => 'INT'
-        //    ],
-        //    'user_turn' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255'
-        //    ],
-        //    'turn_owner' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255'
-        //    ],
-        //    'pass_num' => [
-        //        'type'       => 'INT'
-        //    ],
-        //    'game_end_flg' => [
-        //        'type'       => 'TINYINT',
-        //        'null'       => FALSE
-        //    ],
-        //    'insert_time' => [
-        //        'type'       => 'TIMESTAMP',
-        //        'null'       => FALSE
-        //    ]
-        //]);
-        //$this->dbforge->add_key('game_status_id', TRUE);
-        //$this->dbforge->add_key('game_id', TRUE);
-
-        ////Create table 'daifugo_game_manager'
-        //if ($this->dbforge->create_table('daifugo_game_manager')) {
-        //    echo 'Create table daifugo_game_manager Success!' . PHP_EOL;
-        //}
-
-
-        /**
-         * daifugo_hand
-         */
-        // Drop table 'daifugo_hand' if it exists
-        //$this->dbforge->drop_table('daifugo_hand', TRUE);
-
-        // Table structure for table 'daifugo_hand'
-        //$this->dbforge->add_field([
-        //    'game_id' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255',
-        //        'null'       => FALSE
-        //    ],
-        //    'user_id' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255',
-        //        'null'       => FALSE
-        //    ],
-        //    'card_id' => [
-        //        'type'       => 'INT',
-        //        'null'       => FALSE
-        //    ],
-        //    'used_flg' => [
-        //        'type'       => 'TINYINT',
-        //        'null'       => FALSE
-        //    ],
-        //    'strength_level' => [
-        //        'type'       => 'INT',
-        //        'null'       => FALSE
-        //    ]
-        //]);
-        //$this->dbforge->add_key('game_id', TRUE);
-        //$this->dbforge->add_key('user_id', TRUE);
-        //$this->dbforge->add_key('card_id', TRUE);
-
-        ////Create table 'daifugo_hand'
-        //if ($this->dbforge->create_table('daifugo_hand')) {
-        //    echo 'Create table daifugo_hand Success!' . PHP_EOL;
-        //}
-
-
-        /**
-         * daifugo_user_status
-         */
-        // Drop table 'daifugo_user_status' if it exists
-        //$this->dbforge->drop_table('daifugo_user_status', TRUE);
-
-        // Table structure for table 'daifugo_user_status'
-        // $this->dbforge->add_field([
-        //     'game_status_id' => [
-        //         'type'       => 'VARCHAR',
-        //         'constraint' => '255',
-        //         'null'       => FALSE
-        //     ],
-        //     'game_id' => [
-        //         'type'       => 'VARCHAR',
-        //         'constraint' => '255',
-        //         'null'       => FALSE
-        //     ],
-        //     'game_turn' => [
-        //         'type'       => 'INT'
-        //     ],
-        //     'user_id' => [
-        //         'type'       => 'VARCHAR',
-        //         'constraint' => '255',
-        //         'null'       => FALSE
-        //     ],
-        //     'pass_flg' => [
-        //         'type'       => 'TINYINT',
-        //         'null'       => FALSE
-        //     ],
-        //     'user_end_flg' => [
-        //         'type'       => 'TINYINT',
-        //         'null'       => FALSE
-        //     ]
-        // ]);
-        // $this->dbforge->add_key('game_status_id', TRUE);
-        // $this->dbforge->add_key('game_id', TRUE);
-        // $this->dbforge->add_key('user_id', TRUE);
-
-        // //Create table 'daifugo_user_status'
-        // if ($this->dbforge->create_table('daifugo_user_status')) {
-        //     echo 'Create table daifugo_user_status Success!' . PHP_EOL;
-        // }
-
-
-        /**
-         * daifugo_game_area_card
-         */
-        // Drop table 'daifugo_game_area_card' if it exists
-        //$this->dbforge->drop_table('daifugo_game_area_card', TRUE);
-
-        // Table structure for table 'daifugo_game_area_card'
-        // $this->dbforge->add_field([
-        //     'game_status_id' => [
-        //         'type'       => 'VARCHAR',
-        //         'constraint' => '255',
-        //         'null'       => FALSE
-        //     ],
-        //     'game_id' => [
-        //         'type'       => 'VARCHAR',
-        //         'constraint' => '255',
-        //         'null'       => FALSE
-        //     ],
-        //     'game_turn' => [
-        //         'type'       => 'INT'
-        //     ],
-        //     'card_ids' => [
-        //         'type'       => 'VARCHAR',
-        //         'constraint' => '255'
-        //     ],
-        //     'discard_flg' => [
-        //         'type'       => 'TINYINT',
-        //         'null'       => FALSE
-        //     ]
-        // ]);
-        // $this->dbforge->add_key('game_status_id', TRUE);
-        // $this->dbforge->add_key('card_ids', TRUE);
-
-        // //Create table 'daifugo_game_area_card'
-        // if ($this->dbforge->create_table('daifugo_game_area_card')) {
-        //     echo 'Create table daifugo_game_area_card Success!' . PHP_EOL;
-        // }
-
-
-        /**
-         * daifugo_result
-         */
-        // Drop table 'daifugo_result' if it exists
-        //$this->dbforge->drop_table('daifugo_result', TRUE);
-
-        // Table structure for table 'daifugo_result'
-        //$this->dbforge->add_field([
-        //    'game_id' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255',
-        //        'null'       => FALSE
-        //    ],
-        //    'user_id' => [
-        //        'type'       => 'VARCHAR',
-        //        'constraint' => '255',
-        //        'null'       => FALSE
-        //    ],
-        //    'user_rank' => [
-        //        'type'       => 'INT'
-        //    ]
-        //]);
-        //$this->dbforge->add_key('user_id', TRUE);
-
-        ////Create table 'daifugo_result'
-        //if ($this->dbforge->create_table('daifugo_result')) {
-        //    echo 'Create table daifugo_result Success!' . PHP_EOL;
-        //}
-
         $this->cEcho('[INFO] Finished Migration.', self::COLOR_SUCCESS);
     }
 
