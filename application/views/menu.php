@@ -24,7 +24,7 @@
                 </div>
                 <div class="info">
                     <p class="name">
-                        <a href="<?= site_url('daifugo/rule'); ?>" class="btn-square"><?= $game['name'] ?></a>
+                        <a href="<?= site_url('daifugo/rule'); ?>" class="btn-square"><?= $game['display_name'] ?></a>
                     </p>
                     <p class="current-class"><?php echo $game['description'] ?></p>
                 </div>

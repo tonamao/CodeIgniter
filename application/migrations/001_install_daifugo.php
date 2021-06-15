@@ -26,7 +26,7 @@ class Migration_Install_daifugo extends CI_Migration
                 'id'           => ['type' => 'INT',     'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
                 'display_name' => ['type' => 'VARCHAR', 'constraint' => 100, 'null' => false],
                 'img_path'     => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'description'  => ['type' => 'TEXT',    'null' => true],
+                'description'  => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             ],
             'keys' => [
                 'id' => true,
@@ -59,7 +59,7 @@ class Migration_Install_daifugo extends CI_Migration
         'tb_daifugo_hand' => [
             'fields' => [
                 'game_id'        => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
-                'user_id'        => ['type' => 'MEDIUMINT', 'constraint' => 20,  'null' => false],
+                'user_id'        => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
                 'card_id'        => ['type' => 'INT',       'constraint' => 11,  'null' => false],
                 'used_flg'       => ['type' => 'TINYINT',   'null' => false],
                 'strength_level' => ['type' => 'INT',       'constraint' => 11,  'null' => false],
@@ -76,7 +76,7 @@ class Migration_Install_daifugo extends CI_Migration
                 'game_end_flg' => ['type' => 'TINYINT',   'null' => false],
             ],
             'keys' => [
-                'game_id'        => true,
+                'game_id'        => false,
             ],
         ],
         'tb_daifugo_user_status' => [
@@ -124,9 +124,9 @@ class Migration_Install_daifugo extends CI_Migration
         ],
         'tb_daifugo_result' => [
             'fields' => [
-                'game_id'   => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-                'user_id'   => ['type' => 'VARCHAR', 'constraint' => 20,  'null' => false],
-                'user_rank' => ['type' => 'INT',     'constraint' => 11,  'null' => false],
+                'game_id'   => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'user_id'   => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'user_rank' => ['type' => 'INT',       'constraint' => 11,  'null' => false],
             ],
             'keys' => [
                 'game_id' => true,
@@ -163,7 +163,7 @@ class Migration_Install_daifugo extends CI_Migration
          * ms_game
          */
         $game_default_data = [
-            'name' => '大富豪',
+            'display_name' => '大富豪',
             'img_path' => 'assets/img/games/millionaire_image.png',
             'description' => 'トランプゲーム大富豪のサンプルです',
         ];

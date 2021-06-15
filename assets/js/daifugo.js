@@ -5,6 +5,7 @@
 	const USER_HAND_NUM = USER_HAND_ELM.childElementCount;
 	const GAME_AREA_CARD_ELM = document.getElementsByClassName("game-area")[0];
 	const CPU_MOVE_INTERVAL_MS = 1000;
+    const BASE_URL = window.location.origin;
 
 	/**
 	 * ボタンクリックイベント
@@ -52,7 +53,7 @@
 		//Ajax
 		$.ajax({
 			type: 'POST', // HTTPメソッド（CodeIgniterだとgetは捨てられる）
-			url: 'http://localhost/daifugo/put', //リクエストの送り先URL（適宜変える）
+			url: BASE_URL + '/daifugo/put', //リクエストの送り先URL（適宜変える）
 			data: postData, //サーバに送るデータ。JSのオブジェクトで書ける
 			dataType: 'json', //サーバからくるデータの形式を指定
 
@@ -81,7 +82,7 @@
 		//Ajax
 		$.ajax({
 			type: 'POST', // HTTPメソッド（CodeIgniterだとgetは捨てられる）
-			url: 'http://localhost/daifugo/pass', //リクエストの送り先URL（適宜変える）
+			url: BASE_URL + '/daifugo/pass', //リクエストの送り先URL（適宜変える）
 			data: postData, //サーバに送るデータ。JSのオブジェクトで書ける
 			dataType: 'json', //サーバからくるデータの形式を指定
 
@@ -112,7 +113,7 @@
 		//Ajax
 		$.ajax({
 			type: 'POST', // HTTPメソッド（CodeIgniterだとgetは捨てられる）
-			url: 'http://localhost/daifugo/test', //リクエストの送り先URL（適宜変える）
+			url: BASE_URL + '/daifugo/test', //リクエストの送り先URL（適宜変える）
 			data: postData, //サーバに送るデータ。JSのオブジェクトで書ける
 			dataType: 'json', //サーバからくるデータの形式を指定
 

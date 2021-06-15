@@ -22,7 +22,7 @@ class GameManager extends CI_Model {
 			$this->db->where(array('game_id' => $gameId));
 
 			$this->db->limit(1)
-				->order_by('insert_time', 'DESC');
+				->order_by('updated_at', 'DESC');
 			$latestRow = $this->db->get('tb_daifugo_game_status')->row();
 
 			//turn owner
@@ -83,7 +83,8 @@ class GameManager extends CI_Model {
 	 * @return gameStatusId
 	 */
 	public function getLatestGameStatus() {
-		$latestQuery = $this->db->query('SELECT game_status_id, MAX(updated_at) FROM tb_daifugo_turn_status;');
+		//$latestQuery = $this->db->query('SELECT game_status_id, MAX(updated_at) FROM tb_daifugo_turn_status;');
+        $latestQuery = $this->db->query('SELECT game_status_id FROM tb_daifugo_turn_status WHERE updated_at = (SELECT MAX(updated_at) FROM tb_daifugo_turn_status);');
 		$gameStatusId = $latestQuery->row()->game_status_id;
 		return $gameStatusId;
 	}

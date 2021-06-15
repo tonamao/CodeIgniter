@@ -12,7 +12,7 @@ class Menu extends CI_Controller
 
 	public function games()
 	{
-		$data['gameInfo'] = $this->masterDataManager->getGameInfo();
+		$data['game_info'] = $this->masterDataManager->getGameInfo();
 		$this->load->view('menu', $data);
 	}
 }
