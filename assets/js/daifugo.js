@@ -236,7 +236,7 @@
 			const cardIndex = parseInt(cardIndexes[cnt++]);
 			const gameAreaElement = `<div class="card img" id="location-${location}" ` +
 				`style="z-index:${zIndex++}; left:${leftValues[location-1]+cardIndex}%; top:${topValues[location-1]}%;">` +
-				`<img src="http://localhost/${card.cardImg}" id="${card.id}" ` +
+				`<img src="${BASE_URL}/${card.cardImg}" id="${card.id}" ` +
 				`width="90" height="auto" alt=""></div>`;
 
 			console.log(`cnt: ${cnt} /card index: ${cardIndex} /id: ${card.id} /imgPath: ${card.cardImg} n` +
