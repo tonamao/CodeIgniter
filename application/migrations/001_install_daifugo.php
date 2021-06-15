@@ -1,415 +1,250 @@
 <?php
+defined('BASEPATH') or exit('No direct script access allowed');
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+class Migration_Install_daifugo extends CI_Migration
+{
+    const COLOR_SUCCESS = 32; // green
+    const COLOR_ERROR   = 31; // red
 
-class Migration_Install_daifugo extends CI_Migration {
-	// アップデート処理
-	public function up() {
-		$this->load->database();
+    public static $drop_table_list = [
+        // master tables.
+        'ms_game',
+        'ms_trump_card',
+        // transaction tables.
+        'tb_daifugo_matching',
+        'tb_daifugo_hand',
+        'tb_daifugo_game_status',
+        'tb_daifugo_user_status',
+        'tb_daifugo_turn_status',
+        'tb_daifugo_game_area_card',
+        'tb_daifugo_result',
+    ];
 
-		/**
-		 * ms_trump_card
-		 */
-		// Drop table 'ms_trump_card' if it exists
-		$this->dbforge->drop_table('ms_trump_card', TRUE);
+    public static $cleate_tables = [
+        'ms_game' => [
+            'fields' => [
+                'id'           => ['type' => 'INT',     'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+                'display_name' => ['type' => 'VARCHAR', 'constraint' => 100, 'null' => false],
+                'img_path'     => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
+                'description'  => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
+            ],
+            'keys' => [
+                'id' => true,
+            ],
+        ],
+        'ms_trump_card' => [
+            'fields' => [
+                'card_id'   => ['type' => 'MEDIUMINT', 'auto_increment' => true, 'null' => false],
+                'card_name' => ['type' => 'VARCHAR',   'constraint' => 20,       'null' => false],
+            ],
+            'keys' => [
+                'card_id' => true,
+            ],
+        ],
+        'tb_daifugo_matching' => [
+            'fields' => [
+                'game_id'     => ['type' => 'MEDIUMINT', 'auto_increment' => true, 'constraint' => 255, 'null' => false],
+                'player_1'    => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'player_2'    => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'player_3'    => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'player_4'    => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'game_order'  => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'rule_ids'    => ['type' => 'VARCHAR',   'constraint' => 100, 'null' => false],
+                'playing_flg' => ['type' => 'TINYINT',   'null' => false],
+            ],
+            'keys' => [
+                'game_id' => true,
+            ],
+        ],
+        'tb_daifugo_hand' => [
+            'fields' => [
+                'game_id'        => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'user_id'        => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'card_id'        => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'used_flg'       => ['type' => 'TINYINT',   'null' => false],
+                'strength_level' => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+            ],
+            'keys' => [
+                'game_id' => true,
+                'user_id' => true,
+                'card_id' => true,
+            ],
+        ],
+        'tb_daifugo_game_status' => [
+            'fields' => [
+                'game_id'      => ['type' => 'MEDIUMINT', 'constraint' => 11,  'null' => false],
+                'game_end_flg' => ['type' => 'TINYINT',   'null' => false],
+            ],
+            'keys' => [
+                'game_id'        => false,
+            ],
+        ],
+        'tb_daifugo_user_status' => [
+            'fields' => [
+                'game_status_id' => ['type' => 'VARCHAR',   'constraint' => 255, 'null' => false],
+                'game_id'        => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'user_id'        => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'game_turn'      => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'pass_flg'       => ['type' => 'TINYINT',   'null' => false],
+                'user_end_flg'   => ['type' => 'TINYINT',   'null' => false],
+            ],
+            'keys' => [
+                'game_status_id' => true,
+                'game_id'        => true,
+                'user_id'        => true,
+            ],
+        ],
+        'tb_daifugo_turn_status' => [
+            'fields' => [
+                'game_status_id' => ['type' => 'MEDIUMINT', 'auto_increment' => true, 'constraint' => 255, 'null' => false],
+                'game_id'        => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'game_turn'      => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'turn_user'      => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'turn_owner'     => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'pass_num'       => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'turn_end_flg'   => ['type' => 'TINYINT',   'null' => false],
+            ],
+            'keys' => [
+                'game_status_id' => true,
+                'game_id'        => true,
+            ],
+        ],
+        'tb_daifugo_game_area_card' => [
+            'fields' => [
+                'game_status_id' => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'game_id'        => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'game_turn'      => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+                'card_ids'       => ['type' => 'VARCHAR',   'constraint' => 255, 'null' => false],
+                'discard_flg'    => ['type' => 'TINYINT',   'null' => false],
+            ],
+            'keys' => [
+                'game_status_id' => true,
+                'card_ids'       => true,
+            ],
+        ],
+        'tb_daifugo_result' => [
+            'fields' => [
+                'game_id'   => ['type' => 'MEDIUMINT', 'constraint' => 255, 'null' => false],
+                'user_id'   => ['type' => 'VARCHAR',   'constraint' => 20,  'null' => false],
+                'user_rank' => ['type' => 'INT',       'constraint' => 11,  'null' => false],
+            ],
+            'keys' => [
+                'game_id' => true,
+                'user_id' => true,
+            ],
+        ],
+    ];
 
-		// Table structure for table 'ms_trump_card'
-		$this->dbforge->add_field([
-			'card_id' => [
-				'type' => 'MEDIUMINT',
-				'auto_increment' => TRUE,
-				'null' => FALSE,
-			],
-			'card_name' => [
-				'type' => 'VARCHAR',
-				'constraint' => '20',
-				'null' => FALSE,
-			],
-		]);
-		$this->dbforge->add_key('card_id', TRUE);
+    public static $common_fields = [
+        '`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+        '`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+    ];
 
-		//Create table 'ms_trump_card'
-		if ($this->dbforge->create_table('ms_trump_card')) {
-			echo 'Create table ms_trump_card Success!';
-		}
+    // アップデート処理
+    public function up()
+    {
+        $this->cEcho('[INFO] Start Migration.', self::COLOR_SUCCESS);
 
-		//Insert ms trump card data
-		$mark = ['club', 'diamond', 'heart', 'spade'];
-		for ($i = 0; $i < count($mark); $i++) {
-			for ($j = 0; $j < 13; $j++) {
-				$ms_data = [
-					'card_id' => (13 * $i) + ($j + 1),
-					'card_name' => $mark[$i] . '_' . ($j + 1),
-				];
-				$this->db->insert('ms_trump_card', $ms_data);
-			}
-		}
+        $this->load->database();
 
-		//Insert 2 jokers
-		for ($i = 0; $i < 2; $i++) {
-			$joker_data = [
-				'card_id' => (53 + $i),
-				'card_name' => 'joker_' . ($i + 1),
-			];
-			$this->db->insert('ms_trump_card', $joker_data);
-		}
+        $this->cEcho('[INFO] STEP1: Drop All Tables.', self::COLOR_SUCCESS);
+        $this->_dropTablesAll(true);
+        $this->cEcho('[INFO] Done.', self::COLOR_SUCCESS);
 
-		//Insert card back
-		$back_data = [
-			'card_id' => 55,
-			'card_name' => 'back',
-		];
-		$this->db->insert('ms_trump_card', $back_data);
+        $this->cEcho('[INFO] STEP2: Create All Tables.', self::COLOR_SUCCESS);
+        $this->_cleateTablesAll();
+        $this->cEcho('[INFO] Done.', self::COLOR_SUCCESS);
 
-		/**
-		 * ms_game
-		 */
-		// Drop table 'ms_game' if it exists
-		$this->dbforge->drop_table('ms_game', TRUE);
+        $this->cEcho('[INFO] STEP3: Insert Default Data.', self::COLOR_SUCCESS);
+        //$this->_cleateTablesAll();
 
-		// Table structure for table 'ms_game'
-		$this->dbforge->add_field([
-			'id' => [
-				'type' => 'MEDIUMINT',
-				'auto_increment' => TRUE,
-				'null' => FALSE,
-			],
-			'display_name' => [
-				'type' => 'VARCHAR',
-				'constraint' => '50',
-				'null' => FALSE,
-			],
-			'img_path' => [
-				'type' => 'VARCHAR',
-				'constraint' => '50',
-				'null' => FALSE,
-			],
-			'description' => [
-				'type' => 'VARCHAR',
-				'constraint' => '200',
-				'null' => FALSE,
-			],
-		]);
-		$this->dbforge->add_key('id', TRUE);
+        // FIXME なんかよういする
+        /**
+         * ms_game
+         */
+        $game_default_data = [
+            'display_name' => '大富豪',
+            'img_path' => 'assets/img/games/millionaire_image.png',
+            'description' => 'トランプゲーム大富豪のサンプルです',
+        ];
+        $this->db->insert('ms_game', $game_default_data);
 
-		//Create table 'ms_game'
-		if ($this->dbforge->create_table('ms_game')) {
-			echo 'Create table ms_game Success!';
-		}
+        /**
+         * ms_trump_card
+         */
+        //Insert ms trump card data
+        $mark = ['club', 'diamond', 'heart', 'spade'];
+        for ($i = 0; $i < count($mark); $i++) {
+            for ($j = 0; $j < 13; $j++) {
+                $ms_data = [
+                    'card_id'   => (13 * $i) + ($j + 1),
+                    'card_name' => $mark[$i] . '_' . ($j + 1)
+                ];
+                $this->db->insert('ms_trump_card', $ms_data);
+            }
+        }
 
-		$ms_game = [
-			'id' => '1',
-			'display_name' => 'DAIFUGO',
-			'img_path' => 'DAIFUGO',
-			'description' => '手持ちのカードをルールに従って場に出して、大富豪を目指そう！',
-		];
-		$this->db->insert('ms_game', $ms_game);
+        //Insert 2 jokers
+        for ($i = 0; $i < 2; $i++) {
+            $joker_data = [
+                'card_id'   => (53 + $i),
+                'card_name' => 'joker_' . ($i + 1)
+            ];
+            $this->db->insert('ms_trump_card', $joker_data);
+        }
 
-		/**
-		 * user_playing_game
-		// Drop table 'user_playing_game' if it exists
-		$this->dbforge->drop_table('user_playing_game', TRUE);
+        //Insert card back
+        $back_data = [
+            'card_id'   => 55,
+            'card_name' => 'back'
+        ];
+        $this->db->insert('ms_trump_card', $back_data);
 
-		// Table structure for table 'user_playing_game'
-		$this->dbforge->add_field([
-			'user_id' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-			],
-			'playing_game_id' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-			],
-		]);
-
-		//Create table 'user_playing_game'
-		if ($this->dbforge->create_table('user_playing_game')) {
-			echo 'Create table user_playing_game Success!';
-		}
-
-		//TODO: ユーザーを作るときにINSERTするようにする(INSERT TEST DATA)
-		$test_user = [
-			'user_id' => 'user0',
-			'playing_game_id' => 'DFG0',
-		];
-		$this->db->insert('user_playing_game', $test_user);
-    */
-
-		/**
-		 * daifugo_matching
-		 */
-		// Drop table 'daifugo_matching' if it exists
-		$this->dbforge->drop_table('daifugo_matching', TRUE);
-
-		// Table structure for table 'daifugo_matching'
-		$this->dbforge->add_field([
-			'game_id' => [
-				'type' => 'MEDIUMINT',
-				'null' => FALSE,
-			],
-			'player_1' => [
-				'type' => 'VARCHAR',
-				'constraint' => '20',
-				'null' => FALSE,
-			],
-			'player_2' => [
-				'type' => 'VARCHAR',
-				'constraint' => '20',
-				'null' => FALSE,
-			],
-			'player_3' => [
-				'type' => 'VARCHAR',
-				'constraint' => '20',
-				'null' => FALSE,
-			],
-			'player_4' => [
-				'type' => 'VARCHAR',
-				'constraint' => '20',
-				'null' => FALSE,
-			],
-			'game_order' => [
-				'type' => 'INT',
-				'null' => FALSE,
-			],
-			'rule_ids' => [
-				'type' => 'VARCHAR',
-				'constraint' => '80',
-			],
-			'playing_flg' => [
-				'type' => 'TINYINT',
-				'null' => FALSE,
-			],
-		]);
-
-		/**
-		 * INSERT INTO daifugo_matching VALUES ('1', 'user_0', 'cpu, 'cpu', 'cpu',....)
-		 */
-
-		//Create table 'daifugo_matching'
-		if ($this->dbforge->create_table('daifugo_matching')) {
-			echo 'Create table daifugo_matching Success!';
-		}
-
-		/**
-		 * daifugo_turn_status
-		 */
-		// Drop table 'daifugo_turn_status' if it exists
-		$this->dbforge->drop_table('daifugo_turn_status', TRUE);
-
-		// Table structure for table 'daifugo_turn_status'
-		$this->dbforge->add_field([
-			'game_status_id' => [
-				'type' => 'MEDIUMINT',
-				'auto_increment' => TRUE,
-				'null' => FALSE,
-			],
-			'game_id' => [
-				'type' => 'MEDIUMINT',
-				'null' => FALSE,
-			],
-			'game_turn' => [
-				'type' => 'INT',
-			],
-			'turn_user' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-			],
-			'turn_owner' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-			],
-			'pass_num' => [
-				'type' => 'INT',
-			],
-			'turn_end_flg' => [
-				'type' => 'TINYINT',
-				'null' => FALSE,
-			],
-		  'updated_at DATETIME default CURRENT_TIMESTAMP',
-    ]);
-		$this->dbforge->add_key('game_status_id', TRUE);
-		$this->dbforge->add_key('game_id', TRUE);
-
-		//Create table 'daifugo_turn_status'
-		if ($this->dbforge->create_table('daifugo_turn_status')) {
-			echo 'Create table daifugo_turn_status Success!';
-		}
-
-		/**
-		 * daifugo_hand
-		 */
-		// Drop table 'daifugo_hand' if it exists
-		$this->dbforge->drop_table('daifugo_hand', TRUE);
-
-		// Table structure for table 'daifugo_hand'
-		$this->dbforge->add_field([
-			'game_id' => [
-				'type' => 'MEDIUMINT',
-				'null' => FALSE,
-			],
-			'user_id' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-				'null' => FALSE,
-			],
-			'card_id' => [
-				'type' => 'INT',
-				'null' => FALSE,
-			],
-			'used_flg' => [
-				'type' => 'TINYINT',
-				'null' => FALSE,
-			],
-			'strength_level' => [
-				'type' => 'INT',
-				'null' => FALSE,
-			],
-		]);
-		$this->dbforge->add_key('game_id', TRUE);
-		$this->dbforge->add_key('user_id', TRUE);
-		$this->dbforge->add_key('card_id', TRUE);
-
-		//Create table 'daifugo_hand'
-		if ($this->dbforge->create_table('daifugo_hand')) {
-			echo 'Create table daifugo_hand Success!';
+        $this->cEcho('[INFO] Done.', self::COLOR_SUCCESS);
+        $this->cEcho('[INFO] Finished Migration.', self::COLOR_SUCCESS);
     }
 
-		/**
-		 * daifugo_game_status
-		 */
-		// Drop table 'daifugo_game_status' if it exists
-		$this->dbforge->drop_table('daifugo_game_status', TRUE);
+    // ロールバック処理
+    public function down()
+    {
+    }
 
-		// Table structure for table 'daifugo_game_status'
-		$this->dbforge->add_field([
-			'game_id' => [
-				'type' => 'MEDIUMINT',
-				'null' => FALSE,
-			],
-			'game_end_flg' => [
-				'type' => 'TINYINT',
-				'null' => FALSE,
-			],
-		  'updated_at DATETIME default CURRENT_TIMESTAMP',
-		]);
+    public function cEcho($message, $color)
+    {
+        $string = sprintf("\033[%dm%s\033[m", $color, $message);
+        echo $string . PHP_EOL;
+    }
 
-		//Create table 'daifugo_game_status'
-		if ($this->dbforge->create_table('daifugo_game_status')) {
-			echo 'Create table daifugo_game_status Success!';
-		}
+    // =====================================
+    // private functions
+    // =====================================
 
-		/**
-		 * daifugo_user_status
-		 */
-		// Drop table 'daifugo_user_status' if it exists
-		$this->dbforge->drop_table('daifugo_user_status', TRUE);
+    private function _dropTablesAll($is_exists = false)
+    {
+        foreach (self::$drop_table_list as $table) {
+            $this->dbforge->drop_table($table, $is_exists);
+            echo "[INFO] Drop Table {$table}." . PHP_EOL;
+        }
+    }
 
-		// Table structure for table 'daifugo_user_status'
-		$this->dbforge->add_field([
-			'game_status_id' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-				'null' => FALSE,
-			],
-			'game_id' => [
-				'type' => 'MEDIUMINT',
-				'null' => FALSE,
-			],
-			'game_turn' => [
-				'type' => 'INT',
-			],
-			'user_id' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-				'null' => FALSE,
-			],
-			'pass_flg' => [
-				'type' => 'TINYINT',
-				'null' => FALSE,
-			],
-			'user_end_flg' => [
-				'type' => 'TINYINT',
-				'null' => FALSE,
-			],
-		]);
-		$this->dbforge->add_key('game_status_id', TRUE);
-		$this->dbforge->add_key('game_id', TRUE);
-		$this->dbforge->add_key('user_id', TRUE);
+    private function _cleateTablesAll()
+    {
+        foreach (self::$cleate_tables as $table => $info) {
+            if (!isset($info['fields'])) {
+                continue;
+            }
+            $fields = array_merge($info['fields'], self::$common_fields);
+            $this->dbforge->add_field($fields);
 
-		//Create table 'daifugo_user_status'
-		if ($this->dbforge->create_table('daifugo_user_status')) {
-			echo 'Create table daifugo_user_status Success!';
-		}
+            if (!isset($info['keys']) || empty($info['keys'])) {
+                continue;
+            }
+            foreach ($info['keys'] as $key => $primary_key) {
+                $this->dbforge->add_key($key, $primary_key);
+            }
 
-		/**
-		 * daifugo_game_area_card
-		 */
-		// Drop table 'daifugo_game_area_card' if it exists
-		$this->dbforge->drop_table('daifugo_game_area_card', TRUE);
-
-		// Table structure for table 'daifugo_game_area_card'
-		$this->dbforge->add_field([
-			'game_status_id' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-				'null' => FALSE,
-			],
-			'game_id' => [
-				'type' => 'MEDIUMINT',
-				'null' => FALSE,
-			],
-			'game_turn' => [
-				'type' => 'INT',
-			],
-			'card_ids' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-			],
-			'discard_flg' => [
-				'type' => 'TINYINT',
-				'null' => FALSE,
-			],
-		]);
-		$this->dbforge->add_key('game_status_id', TRUE);
-		$this->dbforge->add_key('card_ids', TRUE);
-
-		//Create table 'daifugo_game_area_card'
-		if ($this->dbforge->create_table('daifugo_game_area_card')) {
-			echo 'Create table daifugo_game_area_card Success!';
-		}
-
-		/**
-		 * daifugo_result
-		 */
-		// Drop table 'daifugo_result' if it exists
-		$this->dbforge->drop_table('daifugo_result', TRUE);
-
-		// Table structure for table 'daifugo_result'
-		$this->dbforge->add_field([
-			'user_id' => [
-				'type' => 'VARCHAR',
-				'constraint' => '255',
-				'null' => FALSE,
-			],
-			'game_id' => [
-				'type' => 'MEDIUMINT',
-				'null' => FALSE,
-			],
-			'user_rank' => [
-				'type' => 'INT',
-			],
-		]);
-		$this->dbforge->add_key('user_id', TRUE);
-
-		//Create table 'daifugo_result'
-		if ($this->dbforge->create_table('daifugo_result')) {
-			echo 'Create table daifugo_result Success!';
-		}
-
-	}
-
-	// ロールバック処理
-	public function down() {
-	}
-
+            $this->dbforge->create_table($table);
+            echo "[INFO] Create Table {$table}." . PHP_EOL;
+        }
+    }
 }
