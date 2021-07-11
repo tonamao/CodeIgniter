@@ -1,26 +1,23 @@
 <?php
-require_once dirname(__FILE__).'/../util/DatabaseTester.php';
-use PHPUnit\DbUnit\DataSet\YamlDataSet;
 
-class Masterdatamanager_test extends DatabaseTester
+class Masterdatamanager_test extends UnitTestCase
 {
-
-    /**
-     */
-    protected function getDataSet()
+    public static function setUpBeforeClass() : void
     {
-        return new YamlDataSet(
-            dirname(__FILE__) . "/../" . "fixture/ms_game.yml"
-        );
-        // return new PHPUnit_Extensions_Database_DataSet_YamlDataSet(
-        //     dirname(__FILE__) . "/../" . "fixture/ms_game.yml"
-        // );
+        parent::setUpBeforeClass();
+        $CI =& get_instance();
+        $CI->load->library('Seeder');
+        $CI->seeder->call('MsGameSeeder');
+    }
+
+    public  function setUp() : void
+    {
+        $this->obj = $this->newModel('MasterDataManager');
     }
 
     public function test_getGameInfo()
     {
-        //$result = $this->obj->getGameInfo();
-        $result = $this->getConnection()->getRowCount('ms_game');
-        $this->assertEquals(2, $result);
+        $info = $this->obj->getGameInfo();
+        $this->assertGreaterThan(0, count($info));
     }
 }
