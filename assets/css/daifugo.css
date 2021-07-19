@@ -1,19 +1,19 @@
 html,body{
-	font-family: 'Quicksand', sans-serif;
-	text-align: center;
-	user-select: none;
+    font-family: 'Quicksand', sans-serif;
+    text-align: center;
+    user-select: none;
 
-	background: #ffedff;
-	color: #754F44;
-	font-size: 20px;
-	font-weight: bold;
+    background: #ffedff;
+    color: #754F44;
+    font-size: 20px;
+    font-weight: bold;
 
-	height: 100%;
-	margin:0;
+    height: 100%;
+    margin:0;
 }
 
 .cpu-area{
-	height: 20%;
+    height: 20%;
 
 }
 
@@ -24,7 +24,7 @@ html,body{
 }
 
 .game-area{
-	height: 35%;
+    height: 35%;
 
 }
 
@@ -38,12 +38,12 @@ html,body{
 }
 
 .user-area{
-	height: 45%;
+    height: 45%;
 
 }
 
 form{
-    display: inline-block;    
+    display: inline-block;
 }
 
 .btn-square-so-pop {
@@ -74,7 +74,7 @@ form{
 }
 
 .status {
-	display: inline-block;
+    display: inline-block;
 
     padding: 0.5em 1em;
     margin: 2em 0;
@@ -88,7 +88,7 @@ form{
 }
 
 .status > div {
-	display: inline-block;
-	text-align-last: left;
-	margin: 2px;
+    display: inline-block;
+    text-align-last: left;
+    margin: 2px;
 }
