@@ -1,19 +1,19 @@
 html,body{
-	font-family: 'Quicksand', sans-serif;
-	text-align: center;
-	user-select: none;
+    font-family: 'Quicksand', sans-serif;
+    text-align: center;
+    user-select: none;
 
-	background: #ffedff;
-	color: #754F44;
-	font-size: 20px;
-	font-weight: bold;
+    background: #ffedff;
+    color: #754F44;
+    font-size: 20px;
+    font-weight: bold;
 
-	height: 100%;
-	margin:0;
+    height: 100%;
+    margin:0;
 }
 
-.game {
-	display: inline-block;
+.card {
+    display: inline-block;
 
     padding: 0.5em 1em;
     margin: 2em 0;
@@ -26,9 +26,25 @@ html,body{
     width: 240px;
 }
 
+.card-body {
+    font-size: 14px;
+}
+
+.card-title {
+    margin-bottom: 0.75rem;
+}
+
+.card-text {
+    margin-bottom: 0.75rem;
+}
+
+.card-text:last-child {
+    margin-bottom: 0;
+}
+
 .game > div {
-	display: inline-block;
-	text-align-last: left;
+    display: inline-block;
+    text-align-last: left;
 }
 
 .game > div > img {

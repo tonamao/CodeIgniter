@@ -26,12 +26,11 @@ class Daifugo extends CI_Controller {
         //マッチングを状態を登録する
         $this->gameMatching->insertGameMatching(Daifugo::$GAME_NAME);
 
+        $data['game_info'] = $this->masterDataManager->getGameInfo();
         //TODO: ルール情報取得
-        $data['gameInfo'] = $this->masterDataManager->getGameInfo();
+        $data['rule_info'] = [];
 
-        //TODO: ルール情報表示
-
-        $this->load->view('daifugo/rule-selection', $data);
+        $this->load->view('daifugo/rules', $data);
     }
 
     /**
