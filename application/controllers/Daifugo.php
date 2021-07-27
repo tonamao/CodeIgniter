@@ -45,7 +45,7 @@ class Daifugo extends CI_Controller {
         //get all player's hands
         $data['all_hands']       = $this->cardManager->getFirstHandsLists($this->gameMatching->getNumOfPlayer());
         $data['back']            = $this->cardManager->getCardBack();
-        $data['game_area_cards'] = array();
+        $data['game_area_cards'] = [];
 
         //TODO: check player's class & exchange cards -> update hand DB
 
@@ -53,119 +53,96 @@ class Daifugo extends CI_Controller {
     }
 
     /**
-     * put process
      * update player hands & game status, return ajax response
      */
     public function put()
     {
-        ////////////////////////////////
-        // Start To Update USER cards //
-        ////////////////////////////////
-        $userId          = $this->input->post('userId');
-        $userCardsPosted = $this->input->post('cards');
-        $passFlg         = false;
-
-        // TODO: check rule
-        $isMatchingRules = $this->ruleManager->checkRules($this->ruleManager->getRules(), $userCardsPosted);
-        $userEndFlg      = false;
-        $userCardsObj    = null;
-        if ($isMatchingRules) {
-            // update user hand
-            $userCardsObj = $this->cardManager->updateCardToUsed($userId, $userCardsPosted);// FIXME: gameId事前に取っておいて引数に入れる
-        }
-
-        // update game status for user
-        $userEndFlg         = $this->cardManager->getPlayerEndFlg($userId);
-        $latestGameStatusId = $this->_updateGameStatus($userId, $userEndFlg, $passFlg);
-        // update game area cards for user
-        $this->gameAreaManager->insertGameAreaStatus($passFlg, $latestGameStatusId, $userCardsPosted);
-
-        ///////////////////////////////
-        // Start To Update CPU cards //
-        ///////////////////////////////
-        $cpuCards = $this->_useCpuHands($userId, $latestGameStatusId, $passFlg);
-
-        /////////////////////
-        // create response //
-        /////////////////////
-        $data = $this->_createPutResponse($userId, $userCardsObj, $this->cardManager->convertCpuCards($cpuCards));
-
-        //$dataをJSONにして返す
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($data));
+        $this->_execTurn(false);
     }
 
     /**
-     * pass process
      * update only game status, return ajax data
      */
     public function pass()
     {
-        // get ajax data
-        $userId  = $this->input->post('userId');
-        $passFlg = true;
+        $this->_execTurn(true);
+    }
 
-        //update game status
-        $this->gameManager->insertGameStatus($userId, $passFlg);
-        //update user(playing game) status
-        $latestGameStatusId = $this->gameManager->getLatestGameStatus();
-
-        // create response
-        $playerNum               = $this->gameMatching->getNumOfPlayer();
-        $data['all_hands']       = $this->cardManager->getLatestHand($playerNum, $userId);
-        $data['back']            = $this->cardManager->getCardBack();
-        $data['game_area_cards'] = $this->cardManager->getUsedCards();
-
-        ///////////////////////////////
-        // Start To Update CPU cards //
-        ///////////////////////////////
-        $cpuCards = $this->_useCpuHands($userId, $latestGameStatusId, $passFlg);
+    private function _execTurn($passFlg)
+    {
+        $userId      = $this->input->post('userId');
+        $userPutInfo = [
+            $userId => [
+                'used_cards' => $this->input->post('cards'),
+                'pass_flg'   => $passFlg,
+            ],
+        ];
+        $allPlayersSelectingCards = $userPutInfo + $this->cardManager->selectCpuHands($userId, $userPutInfo);
+        $allPlayerUsedCards = [];
+        foreach ($allPlayersSelectingCards as $playerId => $cardArray) {
+            $result = $this->_execPlayerTurn($userId, $playerId, $cardArray['used_cards'], boolval($cardArray['pass_flg']));
+            $allPlayerUsedCards += [$playerId => $result];
+        }
 
         //$dataをJSONにして返す
-        $data = $this->_createPutResponse($userId, null, $this->cardManager->convertCpuCards($cpuCards));
+        $data = $this->_createPutResponse($userId, $allPlayerUsedCards);
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($data));
     }
 
-    private function _updateGameStatus($playerId, $userEndFlg, $passFlg)
+    private function _execPlayerTurn($userId, $playerId, $usedCards=[], $passFlg)
+    {
+        $turnResult = [];
+
+        // update user hand
+        if (!empty($usedCards)) {
+            $playerHands = $this->cardManager->updateCardToUsed($userId, $usedCards);
+        }
+
+        $playerEndFlg = false;
+        if (!$passFlg) {
+            $playerEndFlg = $this->cardManager->getPlayerEndFlg($playerId);
+        }
+        // update game status for user
+        $latestGameStatusId = $this->_updateGameStatus($playerId, $playerEndFlg, $passFlg);
+
+        // update game area cards for user
+        if (!empty($usedCards)) {
+            $this->gameAreaManager->insertGameAreaStatus($userId, $passFlg, $latestGameStatusId, $usedCards);
+        }
+
+        return isset($playerHands) ? $playerHands : [];
+    }
+
+    private function _updateGameStatus($playerId, $playerEndFlg, $passFlg)
     {
         //insert game status
         $this->gameManager->insertGameStatus($playerId, $passFlg);
         //update user status
         $latestGameStatusId = $this->gameManager->getLatestGameStatus();
-        if ($userEndFlg) {
-            $this->gameManager->insertUserStatus($latestGameStatusId, $playerId, $userEndFlg);
+        if ($playerEndFlg) {
+            $this->gameManager->insertUserStatus($latestGameStatusId, $playerId, $playerEndFlg);
         }
         return $latestGameStatusId;
     }
 
-    private function _useCpuHands($userId, $latestGameStatusId, $passFlg)
-    {
-        $cpuNum     = 3; //TODO: 動的に取得する
-        $cpuCardNum = 2; //TODO: 動的に取得する
-        $cpuCards   = $this->cardManager->useCpuHands($this->gameMatching->getGameIdByUserId($userId), $cpuNum, $cpuCardNum); //TODO: 前の人が出したカードを見てカードを選ぶようにする
-        foreach ($cpuCards as $cpuId => $cardArray) {
-            // update CPU hand
-            $cpuEndFlg = $this->cardManager->getPlayerEndFlg($cpuId);
-            // update game status for user
-            $passFlg = count($cardArray) == 0 ? true : false;
-            $latestGameStatusId = $this->_updateGameStatus($cpuId, $cpuEndFlg, $passFlg);
-            // update game area cards for user
-            $this->gameAreaManager->insertGameAreaStatus($passFlg, $latestGameStatusId, $cardArray);
-        }
-        return $cpuCards;
-    }
-
-    private function _createPutResponse($userId, $userCards, $cpuCards)
+    /**
+     * create data of user & cpu hands
+     *
+     * @param int userId
+     * @param array userCards
+     * @param array cpuCards
+     */
+     //FIXME: all_handsは_execPlayerTurn内のupdateCardToUsed()で取得できるはずなので、そこでまとめてやる
+    private function _createPutResponse($userId, $allPlayerUsedCards)
     {
         log_message('debug', '['.__LINE__.'] create response');
         $playerNum = $this->gameMatching->getNumOfPlayer();
         $data['all_hands'] = $this->cardManager->getLatestHand($playerNum, $userId);
         $data['back'] = $this->cardManager->getCardBack();
-        $data['cards_used_in_current_turn'] = $userCards;
-        $data['cards_cpu_used_in_current_turn'] = $cpuCards;
+        $data['cards_used_in_current_turn'] = isset($allPlayerUsedCards[$userId]) ? array_splice($allPlayerUsedCards, array_search($userId, $allPlayerUsedCards), 1) : [];
+        $data['cards_cpu_used_in_current_turn'] = $allPlayerUsedCards;
         $data['game_area_cards'] = $this->cardManager->getUsedCards();
         log_message('debug', 'Response [cards_used_in_current_turn]: ' . print_r($data['cards_used_in_current_turn'], true));
         log_message('debug', 'Response [cards_cpu_used_in_current_turn]: ' . print_r($data['cards_cpu_used_in_current_turn'], true));

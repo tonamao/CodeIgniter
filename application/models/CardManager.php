@@ -184,26 +184,39 @@ class CardManager extends CI_Model {
         return 'assets/img/cards/back.png';
     }
 
+    //FIXME: userId使用してない
     public function updateCardToUsed($userId, $targetCards)
     {
-        // カードを使用済みに更新する
         $gameId = $this->db->get_where('tb_daifugo_matching', array('player_1' => 'user0', 'playing_flg' => true))->row()->game_id;
+        return $this->_updateCards($gameId, $targetCards, 'used_flg', true);
+    }
+
+    private function _updateCards($gameId, $targetCards, $column, $value)
+    {
+        require_once 'Entity/Card.php';
+        $updatedCardList = [];
         foreach ($targetCards as $cardId) {
-            $this->db->set('used_flg', true);
+            // カードを使用済みに更新する
+            $this->db->set($column, $value);
             $this->db->where(array('game_id' => $gameId, 'card_id' => $cardId));
             $this->db->update('tb_daifugo_hand');
-        }
-        log_message('debug', __METHOD__."[".__LINE__."]".'USER card : ' . print_r($targetCards, true));
 
-        // CardListを返す
-        require_once 'Entity/Card.php';
-        $cardList = [];
-        foreach ($targetCards as $cardId) {
+            // updatedCardListを返す
             $cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
             $card = new Card();
             $card->setId($cardId);
             $card->setCardImg('assets/img/cards/' . $cardName . '.png');
-            array_push($cardList, $card);
+            array_push($updatedCardList, $card);
+            //$updatedCardList[] = $card;
+        }
+        return $updatedCardList;
+    }
+
+    public function updateCpuHands($gameId, $selectingCards)
+    {
+        $cardList = [];
+        foreach ($selectingCards as $cpuId => $cardIdArray) {
+            $cardList += [$cpuId => $this->_updateCards($gameId, $cardIdArray, 'used_flg', true)];
         }
         return $cardList;
     }
@@ -282,54 +295,85 @@ class CardManager extends CI_Model {
     }
 
     /**
-     *    OLDOLDOLDOLD
-     *
-     *
-     * update selecting card's used_flg to true
-     * @param  int $userId
-     * @param  Array $selectingCardArray
-     */
-    public function updateSelectingCards($userId, $selectingCardArray)
-    {
-        log_message('debug', 'CardManager argArray: ' . print_r($selectingCardArray, true));
-        if (empty($userId) || empty($selectingCardArray)) {
-            return null;
-        }
-
-        $gameId = $this->db->get_where('user', array('user_id' => $userId))->row()->playing_game_id;
-        $table = '';
-        if (strpos($gameId, CardManager::$GAME_NAME) !== false) {
-            $table = 'tb_daifugo_hand';
-        }
-
-        foreach ($selectingCardArray as $cardId) {
-            log_message('debug', 'cardId : ' . $cardId);
-            $this->db->set('used_flg', true);
-            $this->db->where(array('game_id' => $gameId, 'card_id' => $cardId));
-            $this->db->update($table);
-        }
-
-        // CardListを返す
-        require_once 'Entity/Card.php';
-        $cardList = [];
-        foreach ($selectingCardArray as $cardId) {
-            $cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
-            $idPath = 'assets/img/cards/' . $cardName . '.png';
-            $card = new Card();
-            $card->setId($cardId);
-            $card->setCardImg($idPath);
-            array_push($cardList, $card);
-        }
-        return $cardList;
-    }
-
-    /**
      * select cpus' card randomly, update cpus' hands
-     * @param  String $gameId
-     * @param  int $cpuNum
+     * @param  String userId
+     * @param  Array userSelectingCards
      * @return Array selectingCards
      */
-    public function useCpuHands($gameId, $cpuNum, $selectingNum)
+    public function selectCpuHands($userId, $userSelectingCards)
+    {
+        $gameId        = $this->db->get_where('tb_daifugo_matching', array('player_1' => $userId, 'playing_flg' => true))->row()->game_id;
+        $lastAreaCards = $this->_getLastAreaCards($gameId);
+        $cpuNum        = $this->_getCpuNum();
+        $cpuAllHand    = $this->_getAllCpuHands($gameId);
+
+        // select putting card randomly
+        $selectingCards = [];
+        foreach ($cpuAllHand as $cpuId => $cardIdArray) {
+            $selectingNum = $this->_getCpuSelectingCardsNum($userId, $lastAreaCards);
+            $randomIndexArray  = array_rand($cardIdArray, $selectingNum);
+            $selectedCardByCpu = [];
+            foreach ($randomIndexArray as $key => $randomIndex) {
+                array_push($selectedCardByCpu, $cardIdArray[$randomIndex]);
+            }
+            $selectingCards += [
+                $cpuId => [
+                    'used_cards' => $selectedCardByCpu,
+                    'pass_flg'   => false,
+                ],
+            ];
+        }
+        return $selectingCards;
+    }
+
+    private function _getLastAreaCards($gameId)
+    {
+        return [];
+    }
+
+    // FIXME
+    private function _getCpuNum()
+    {
+        return 3;
+    }
+
+    // FIXME: ルールに応じた枚数を返却する
+    private function _getCpuSelectingCardsNum($userId, $lastAreaCards)
+    {
+        return rand(2, 4);
+    }
+
+    private function _getAllCpuHands($gameId)
+    {
+        // create cpu id from cpu num
+        $cpuIdArray = [];
+        for ($i = 0; $i < 3; $i++) {
+            array_push($cpuIdArray, 'cpu' . ($i + 1));
+        }
+
+        // get all cpu hands from db
+        $this->db->reset_query();
+        $this->db->select('user_id, card_id')
+            ->where('game_id', $gameId)
+            ->where('used_flg', false);
+        $this->db->where_in('user_id', $cpuIdArray);
+        $records = $this->db->get('tb_daifugo_hand')->result_array();
+
+        // grouping data by cpu id
+        $cpuAllHand = [];
+        foreach ($cpuIdArray as $cpuId) {
+            $cardIdArray = [];
+            foreach ($records as $row) {
+                if ($row['user_id'] == $cpuId) {
+                    array_push($cardIdArray, $row['card_id']);
+                }
+            }
+            $cpuAllHand += array($cpuId => $cardIdArray);
+        }
+        return $cpuAllHand;
+    }
+
+    public function selectCpuCards($gameId, $cpuNum, $selectingNum)
     {
         $table = 'tb_daifugo_hand'; // FIXME: daifugo ではないものも取れるようにする
 
@@ -349,14 +393,7 @@ class CardManager extends CI_Model {
 
         // grouping data by cpu id
         $cpuAllHand = [];
-        foreach ($cpuIdArray as $cpuId) {
-            $cardIdArray = [];
-            foreach ($records as $row) {
-                if ($row['user_id'] == $cpuId) {
-                    array_push($cardIdArray, $row['card_id']);
-                }
-            }
-            $cpuAllHand += array($cpuId => $cardIdArray);
+        for ($i = 0; $i < $cpuNum; $i++) {
         }
 
         // select putting card randomly
@@ -373,28 +410,6 @@ class CardManager extends CI_Model {
             // $selectingCards += array($cpuId => $cardIdArray[array_rand($cardIdArray, 1)]); // ランダムに１つ選ぶ
         }
         log_message('debug', __METHOD__."[".__LINE__."]".'CPU $selectingCards : ' . print_r($selectingCards, true));
-
-        // update cpu hands
-        require_once 'Entity/Card.php';
-        $cardList = [];
-        foreach ($selectingCards as $cpuId => $cardIdArray) {
-            $cardArray = [];
-            foreach ($cardIdArray as $key => $cardId) {
-                $this->db->set('used_flg', true);
-                $this->db->where(array('game_id' => $gameId, 'user_id' => $cpuId, 'card_id' => $cardId));
-                $this->db->update($table);
-
-                // create response
-                $cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
-                $idPath = 'assets/img/cards/' . $cardName . '.png';
-                $card = new Card();
-                $card->setId($cardId);
-                $card->setCardImg($idPath);
-                array_push($cardArray, $card);
-            }
-            $cardList += [$cpuId => $cardArray];
-        }
-
         return $selectingCards;
     }
 
@@ -440,37 +455,5 @@ class CardManager extends CI_Model {
         $this->db->empty_table('tb_daifugo_turn_status');
         $this->db->empty_table('tb_daifugo_result');
         return true;
-    }
-
-    /**
-     * テストメソッド
-     * get selecting cardId & imgPath
-     * @return selecting card array
-     *                [0] => Array ( [37] => assets/img/cards/heart_11.png )
-     *                 [1] => Array ( [26] => assets/img/cards/diamond_13.png )...
-     *                 [n] => Array ( {card id} => {card img path})
-     */
-    public function getSelectingCards($userId, $cardIdArrayStr)
-    {
-
-        log_message('debug', '---getSelectingCards---');
-        $idList = array($cardIdArrayStr);
-        if (strpos($cardIdArrayStr, ',') !== false) {
-            log_message('debug', 'excluding "," target ->' . $cardIdArrayStr);
-            $idList = explode(',', $cardIdArrayStr);
-            log_message('debug', 'finish to explode');
-            log_message('debug', print_r($idList, true));
-        }
-        $selectinhCardImgPathArray = array();
-        foreach ($idList as $key => $cardId) {
-            log_message('debug', 'card id :' . $cardId);
-            $cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
-            log_message('debug', $cardName);
-            $idPath = array($cardId => 'assets/img/cards/' . $cardName . '.png');
-            array_push($selectinhCardImgPathArray, $idPath);
-        }
-
-        log_message('debug', '---getSelectingCards---');
-        return $selectinhCardImgPathArray;
     }
 }

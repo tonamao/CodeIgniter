@@ -36,13 +36,11 @@
         })(i);
     }
 
-    /**
-     * put用ajaxテストコード
-     */
+    // TODO
     function put() {
         let postData = {
             userId: getUserId(),
-            cards: getSelectedCards()
+            cards: getSelectedCards(),
         }
 
         if (!postData.cards) {
@@ -71,11 +69,11 @@
         });
     }
 
-    //TODO :
+    // TODO
     function pass() {
         let postData = {
             userId: getUserId(),
-            cards: null
+            cards: null,
         }
 
         //Ajax
@@ -123,7 +121,7 @@
         if (!userSelectedCards) {
             return;
         }
-        playingMove(userSelectedCards, USER_HAND_ELM);
+        playingMove(userSelectedCards[getUserId()], USER_HAND_ELM);
     }
 
     /**

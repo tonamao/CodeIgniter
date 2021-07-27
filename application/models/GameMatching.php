@@ -1,5 +1,6 @@
 <?php
 class GameMatching extends CI_Model {
+
     public function __construct()
     {
         $this->load->helper('url_helper');
@@ -36,7 +37,7 @@ class GameMatching extends CI_Model {
      */
     public function getGameIdByUserId($userId)
     {
-        // TODO: ユーザに紐づくゲーム情報が複数になった場合は修正する
+        // FIXME
         return $this->db->get_where('tb_daifugo_matching', array('player_1' => $userId, 'playing_flg' => true))->row()->game_id;
     }
 }
