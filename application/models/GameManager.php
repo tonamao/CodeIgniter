@@ -5,7 +5,20 @@ class GameManager extends CI_Model {
     public function __construct()
     {
         $this->load->helper('url_helper');
+        $this->load->model('cardManager');
         $this->load->database();
+    }
+
+    public function selectCards($user_id, $user_turn_info)
+    {
+        $all_players_selecting_cards = $user_turn_info + $this->cardManager->selectCpuHands($user_id, $user_turn_info);
+        log_message('debug', __METHOD__.':'.__LINE__.':all_players_selecting_cards: ' . print_r($all_players_selecting_cards, true));
+        $result = [];
+        foreach ($all_players_selecting_cards as $player_id => $value) {
+            $result[$player_id] = $this->cardManager->convertToCard($value['used_cards']);
+        }
+        log_message('debug', __METHOD__.':'.__LINE__.':result: ' . print_r($result, true));
+        return $result;
     }
 
     /**

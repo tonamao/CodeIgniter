@@ -212,6 +212,20 @@ class CardManager extends CI_Model {
         return $updatedCardList;
     }
 
+    public function convertToCard($targetCards)
+    {
+        require_once 'Entity/Card.php';
+        $updatedCardList = [];
+        foreach ($targetCards as $cardId) {
+            $cardName = $this->db->get_where('ms_trump_card', array('card_id' => $cardId))->row()->card_name;
+            $card = new Card();
+            $card->setId($cardId);
+            $card->setCardImg('assets/img/cards/' . $cardName . '.png');
+            array_push($updatedCardList, $card);
+        }
+        return $updatedCardList;
+    }
+
     public function updateCpuHands($gameId, $selectingCards)
     {
         $cardList = [];
