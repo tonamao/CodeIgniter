@@ -6,16 +6,20 @@ class GameAreaManager extends CI_Model {
     public function __construct()
     {
         $this->load->helper('url_helper');
+        $this->load->model('gameMatching');
         $this->load->database();
     }
 
     /**
      * insert game area status (daifugo_game_area_card)
      */
-    public function insertGameAreaStatus($passFlg, $latestGameStatusId, $selectingCards)
+    public function insertGameAreaStatus($userId, $passFlg, $latestGameStatusId, $selectingCards)
     {
-        $gameId = $this->db->get_where('tb_daifugo_matching', array('player_1' => 'user0', 'playing_flg' => true))->row()->game_id;
-        $turnEndFlg = $this->db->get_where('tb_daifugo_turn_status', array('game_status_id' => $latestGameStatusId))->row()->turn_end_flg;
+        $gameId = $this->gameMatching->getGameIdByUserId($userId);
+        $turnEndFlg = false;
+        if ($latestGameStatusId > 0 ) {
+            $turnEndFlg = $this->db->get_where('tb_daifugo_turn_status', array('game_status_id' => $latestGameStatusId))->row()->turn_end_flg;
+        }
 
         if ($passFlg) {
             // case pass(update)
