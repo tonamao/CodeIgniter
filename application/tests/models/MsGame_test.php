@@ -1,6 +1,6 @@
 <?php
 
-class Masterdatamanager_test extends UnitTestCase
+class MsGame_test extends UnitTestCase
 {
     public static function setUpBeforeClass() : void
     {
@@ -12,12 +12,12 @@ class Masterdatamanager_test extends UnitTestCase
 
     public  function setUp() : void
     {
-        $this->obj = $this->newModel('MasterDataManager');
+        $this->obj = $this->newModel('MsGame');
     }
 
-    public function test_getGameInfo()
+    public function test_findAllGame()
     {
-        $info = $this->obj->getGameInfo();
+        $info = $this->obj->findAllGame();
         $this->assertGreaterThan(0, count($info));
     }
 }
